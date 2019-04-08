@@ -14,6 +14,7 @@ signals:
     void signalViewInit();
 
 public slots:
+
 };
 
 #endif // VIEW_H

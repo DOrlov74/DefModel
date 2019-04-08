@@ -9,6 +9,7 @@
 #include <QAbstractGraphicsShapeItem>
 #include <QRegularExpression>
 #include <QString>
+#include <QtMath>
 
 
 Scene::Scene(QWidget *parent) : QGraphicsScene(parent)
@@ -17,6 +18,7 @@ Scene::Scene(QWidget *parent) : QGraphicsScene(parent)
     m_concretePath->setFillRule(Qt::WindingFill);
     //QObject::connect(this, SIGNAL(signalSceneInit()), this, SLOT(slotSceneInit()), Qt::QueuedConnection);
     //idTimer=startTimer(50);
+
 }
 
 Scene::drawMode Scene::getDrawMode()
@@ -50,6 +52,45 @@ void Scene::slotGetCommand(QString str)
             m_concretePath->closeSubpath();
             m_drawMode=NONE;
             m_doneConcretePath=true;
+            m_isRect=false;
+//            double a1, a2, angle;
+//            int pSize=m_concretePoints.size()-1;
+//            if (m_concretePoints[0].x()==m_concretePoints[1].x())
+//            {
+//                if(m_concretePoints[0].y()<m_concretePoints[1].y())
+//                {a1=M_PI_2;}
+//                else
+//                {a1=-M_PI_2;}
+//            }
+//            else if(m_concretePoints[0].x()<m_concretePoints[1].x())
+//            {
+//                a1=qAtan((m_concretePoints[1].y()-m_concretePoints[0].y())/(m_concretePoints[1].x()-m_concretePoints[0].x()));
+//            }
+//            else {
+//                a1=M_PI+qAtan((m_concretePoints[1].y()-m_concretePoints[0].y())/(m_concretePoints[1].x()-m_concretePoints[0].x()));
+//            }
+//            if (m_concretePoints[0].x()==m_concretePoints[pSize].x())
+//            {
+//                if(m_concretePoints[0].y()<m_concretePoints[pSize].y())
+//                {a2=M_PI_2;}
+//                else
+//                {a2=-M_PI_2;}
+//            }
+//            else if(m_concretePoints[0].x()<m_concretePoints[pSize].x())
+//            {
+//                a2=qAtan((m_concretePoints[pSize].y()-m_concretePoints[0].y())/(m_concretePoints[pSize].x()-m_concretePoints[0].x()));
+//            }
+//            else {
+//                a2=M_PI+qAtan((m_concretePoints[pSize].y()-m_concretePoints[0].y())/(m_concretePoints[pSize].x()-m_concretePoints[0].x()));
+//            }
+//            angle=a2-a1;
+//            if(angle<M_PI)
+//            {
+//                m_leftToRight=true;
+//            }
+//            else {m_leftToRight=false;}
+//            qDebug()<<"angle 0 - 1: "+QString::number(a1)+"angle 0 - last: "+QString::number(a2);
+//            qDebug()<<(m_leftToRight?"from left to right":"from right to left");
             qDebug()<<"draw mode is off";
             qDebug()<<"selected items: "<<m_pointsItems.size();
             for (QGraphicsItem* item: m_pointsItems)
@@ -58,8 +99,12 @@ void Scene::slotGetCommand(QString str)
             }
             m_pointsItems.clear();
             //this->destroyItemGroup(m_pointsGroup);
+            pen.setBrush(Qt::black);
+            // pen.setWidth(1);
+            brush.setColor(Qt::yellow);
             this->addPath(*m_concretePath, pen, brush);
             emit signalDrawMode(false);
+            getSectSizes();
         }
     }
     if (m_drawMode!=NONE&&(m_doneConcretePath==false))
@@ -88,23 +133,23 @@ void Scene::slotSceneInit()
 
 void Scene::slotDivide()
 {
-    double lowX=m_concretePoints[0].x();
-    double highX=m_concretePoints[0].x();
-    double lowY=m_concretePoints[0].y();
-    double highY=m_concretePoints[0].y();
-    for (QPointF p: m_concretePoints)
-    {
-        if (p.x()<lowX)
-        {lowX=p.x();}
-        else if (p.x()>highX)
-        {highX=p.x();}
-        if (p.y()<lowY)
-        {lowY=p.y();}
-        else if (p.y()>highY)
-        {highY=p.y();}
+
+}
+
+void Scene::slotNewSection()
+{
+    qDebug()<<"in new section method";
+    int i=0;
+    for (QGraphicsItem* item: this->items())
+    {this->removeItem(item);
+    qDebug()<<"item " + QString::number(i) + " removed";
+    ++i;
     }
-    m_recWidth=highX-lowX;
-    m_recHeight=highY-lowY;
+    m_concretePoints.erase(m_concretePoints.begin(),m_concretePoints.end());
+    m_doneConcretePath=false;
+    delete m_concretePath;
+    m_concretePath=new QPainterPath();
+    emit signalSceneCleared(true);
 }
 
 QPointF Scene::toSceneCoord(const QPointF& point)
@@ -151,6 +196,11 @@ void Scene::drawPoint(const QPointF& point)
             //m_pointsItems.append(m_currentItem);
             m_drawMode=NONE;
             m_doneConcretePath=true;
+            m_isRect=true;
+            if(m_concretePoints[0].x()<m_concretePoints[1].x()&&m_concretePoints[1].y()<m_concretePoints[2].y())
+            {m_leftToRight=true;}
+            else {m_leftToRight=false;}
+            qDebug()<<(m_leftToRight?"from left to right":"from right to left");
             qDebug()<<"draw mode is off";
             //remove points from scene because the rectangle is finished
             for (QGraphicsItem* item: m_pointsItems)
@@ -159,10 +209,12 @@ void Scene::drawPoint(const QPointF& point)
             }
             m_pointsItems.clear();
             emit signalDrawMode(false);
+            getSectSizes();
         }
         pen.setBrush(Qt::black);
         // pen.setWidth(1);
-        brush.setColor(Qt::yellow);
+        brush.setColor(Qt::yellow); //не работает
+        //this->addPolygon(m_concretePath->toFillPolygon(), pen, brush);
         this->addPath(*m_concretePath, pen, brush);
     }
     if (m_drawMode!=NONE){
@@ -172,6 +224,28 @@ void Scene::drawPoint(const QPointF& point)
     m_pointsItems.append(m_currentItem);
     //m_pointsGroup->addToGroup(m_currentItem);
     }
+}
+
+void Scene::getSectSizes()
+{
+    double lowX=m_concretePoints[0].x();
+    double highX=m_concretePoints[0].x();
+    double lowY=m_concretePoints[0].y();
+    double highY=m_concretePoints[0].y();
+    for (QPointF p: m_concretePoints)
+    {
+        if (p.x()<lowX)
+        {lowX=p.x();}
+        else if (p.x()>highX)
+        {highX=p.x();}
+        if (p.y()<lowY)
+        {lowY=p.y();}
+        else if (p.y()>highY)
+        {highY=p.y();}
+    }
+    m_recWidth=highX-lowX;
+    m_recHeight=highY-lowY;
+    //this->setSceneRect(lowX-m_viewMargin,lowY-m_viewMargin,m_recWidth+m_viewMargin, m_recHeight+m_viewMargin);
 }
 
 void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -191,15 +265,12 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (m_drawMode)
-    {
-
-    }
+    emit signalCoordChanged(toSceneCoord(event->scenePos()));
 }
 
-void Scene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
-{
-}
+//void Scene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+//{
+//}
 
 
 void Scene::timerEvent(QTimerEvent *event)

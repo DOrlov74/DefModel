@@ -20,28 +20,40 @@ MainWindow::MainWindow(QWidget *parent) :
     QCursor cursor;
     cursor.setShape(Qt::CrossCursor);
     ui->graphicsView->setCursor(cursor);
-    QObject::connect(ui->drawLineButton, SIGNAL(toggled(bool)),this, SLOT(drawLineToggled(bool)));
-    QObject::connect(ui->drawRectButton, SIGNAL(toggled(bool)),this, SLOT(drawRectToggled(bool)));
-    QObject::connect(ui->divideButton, SIGNAL(toggled(bool)), this, SLOT(divideToggled(bool)));
-    QObject::connect(ui->newButton, SIGNAL(toggled(bool)), this, SLOT(newSectionToggled(bool)));
-    QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->drawLineButton, SLOT(setEnabled(bool)));
-    QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->drawRectButton, SLOT(setEnabled(bool)));
-    QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->newButton, SLOT(setDisabled(bool)));
-    QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->divideButton, SLOT(setDisabled(bool)));
-    QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->actionLine, SLOT(setEnabled(bool)));
-    QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->actionRectangle, SLOT(setEnabled(bool)));
-    QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->commandTextEdit, SLOT(slotDrawMode(bool)));
-    QObject::connect(ui->actionLine, SIGNAL(triggered()), myScene, SLOT(setDrawLine()));
-    QObject::connect(ui->actionLine, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDrawLine()));
-    QObject::connect(ui->actionRectangle, SIGNAL(triggered()), myScene, SLOT(setDrawRect()));
-    QObject::connect(ui->actionRectangle, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDrawRect()));
-    QObject::connect(ui->actiondivide, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDivide()));
-    QObject::connect(myScene, SIGNAL(signalPointAdded(QPointF)), ui->commandTextEdit, SLOT(slotAddPoint(QPointF)));
-    QObject::connect(this, SIGNAL(signalKeyPressed(QString)), ui->commandTextEdit, SLOT(slotAddKey(QString)));
-    QObject::connect(this, SIGNAL(signalKeyPressed(QString)), myScene, SLOT(slotGetCommand(QString)));
-    QObject::connect(ui->commandTextEdit, SIGNAL(signalCommand(QString)), myScene, SLOT(slotGetCommand(QString)));
-    QObject::connect(ui->graphicsView, SIGNAL(signalViewInit()), myScene, SLOT(slotSceneInit()), Qt::QueuedConnection);// не работает
-    QObject::connect(ui->graphicsView, SIGNAL(signalViewInit()), this, SLOT(setSceneSize()), Qt::QueuedConnection); // не работает
+    QObject::connect(ui->drawLineButton, SIGNAL(toggled(bool)),this, SLOT(drawLineToggled(bool)));          //drawline event
+    QObject::connect(ui->drawRectButton, SIGNAL(toggled(bool)),this, SLOT(drawRectToggled(bool)));          //drawRectangle event
+    QObject::connect(ui->divideButton, SIGNAL(toggled(bool)), this, SLOT(divideToggled(bool)));             //divide section event
+    QObject::connect(ui->newButton, SIGNAL(toggled(bool)), this, SLOT(newSectionToggled(bool)));            // new section event
+    QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->drawLineButton, SLOT(setEnabled(bool)));    //enable/disable drawLine Button
+    QObject::connect(myScene, SIGNAL(signalSceneCleared(bool)), ui->drawLineButton, SLOT(setEnabled(bool)));
+    QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->drawRectButton, SLOT(setEnabled(bool)));    //enable/disable drawRectangle Button
+    QObject::connect(myScene, SIGNAL(signalSceneCleared(bool)), ui->drawRectButton, SLOT(setEnabled(bool)));
+    QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->newButton, SLOT(setDisabled(bool)));        //enable/disable new section Button
+    QObject::connect(myScene, SIGNAL(signalSceneCleared(bool)), ui->newButton, SLOT(setDisabled(bool)));
+    QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->actionNewSection, SLOT(setDisabled(bool)));
+    QObject::connect(myScene, SIGNAL(signalSceneCleared(bool)), ui->actionNewSection, SLOT(setDisabled(bool)));
+    QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->divideButton, SLOT(setDisabled(bool)));     //enable/disable divide section Button
+    QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->actiondivide, SLOT(setDisabled(bool)));
+    QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->actionLine, SLOT(setEnabled(bool)));        //enable/disable drawLine action
+    QObject::connect(myScene, SIGNAL(signalSceneCleared(bool)), ui->actionLine, SLOT(setEnabled(bool)));
+    QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->actionRectangle, SLOT(setEnabled(bool)));   //enable/disable drawRectangle action
+    QObject::connect(myScene, SIGNAL(signalSceneCleared(bool)), ui->actionRectangle, SLOT(setEnabled(bool)));
+    QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->commandTextEdit, SLOT(slotDrawMode(bool))); //send a signal of changing mode to textEdit
+    QObject::connect(myScene, SIGNAL(signalCoordChanged(QPointF)), this, SLOT(slotCoordChanged(QPointF)));  //get actual coordinats from Scene
+    QObject::connect(ui->actionFit_to_section, SIGNAL(triggered()), this, SLOT(slotFitView()));             //try to fit view
+    QObject::connect(ui->actionLine, SIGNAL(triggered()), myScene, SLOT(setDrawLine()));                    //send command drawLine to Scene
+    QObject::connect(ui->actionLine, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDrawLine()));       //send command drawLine to textEdit
+    QObject::connect(ui->actionRectangle, SIGNAL(triggered()), myScene, SLOT(setDrawRect()));               //send command drawRectangle to Scene
+    QObject::connect(ui->actionRectangle, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDrawRect()));  //send command drawRectangle to textEdit
+    QObject::connect(ui->actiondivide, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDivide()));       //send command divide to textEdit
+    QObject::connect(ui->actiondivide, SIGNAL(triggered()), myScene, SLOT(slotDivide()));                   //send command divide to Scene
+    QObject::connect(ui->actionNewSection, SIGNAL(triggered()), myScene, SLOT(slotNewSection()));           //send command new section to Scene
+    QObject::connect(myScene, SIGNAL(signalPointAdded(QPointF)), ui->commandTextEdit, SLOT(slotAddPoint(QPointF))); //send added point to textEdit
+    QObject::connect(this, SIGNAL(signalKeyPressed(QString)), ui->commandTextEdit, SLOT(slotAddKey(QString)));      //send command key from mainWidget to textEdit
+    QObject::connect(this, SIGNAL(signalKeyPressed(QString)), myScene, SLOT(slotGetCommand(QString)));              //send command key from mainWidget to Scene
+    QObject::connect(ui->commandTextEdit, SIGNAL(signalCommand(QString)), myScene, SLOT(slotGetCommand(QString)));  //send command key from textEdit to Scene
+    QObject::connect(ui->graphicsView, SIGNAL(signalViewInit()), myScene, SLOT(slotSceneInit()), Qt::QueuedConnection); //try to get actual size of Scene не работает
+    QObject::connect(ui->graphicsView, SIGNAL(signalViewInit()), this, SLOT(setSceneSize()), Qt::QueuedConnection);     //try to get actual size of Scene  не работает
 }
 
 MainWindow::~MainWindow()
@@ -77,6 +89,16 @@ void MainWindow::newSectionToggled(bool b)
 {
     if (b)
     {emit ui->actionNewSection->triggered();}
+}
+
+void MainWindow::slotFitView()
+{
+    ui->graphicsView->fitInView(myScene->sceneRect(), Qt::KeepAspectRatio);
+}
+
+void MainWindow::slotCoordChanged(QPointF point)
+{
+    ui->statusBar->showMessage("x:"+ QString::number(point.x())+" y:"+ QString::number(point.y()));
 }
 
 

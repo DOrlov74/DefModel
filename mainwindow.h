@@ -27,6 +27,8 @@ public slots:
     void drawRectToggled(bool);
     void divideToggled(bool);
     void newSectionToggled(bool);
+    void slotFitView();
+    void slotCoordChanged(QPointF);
 
 private:
     Ui::MainWindow *ui;
