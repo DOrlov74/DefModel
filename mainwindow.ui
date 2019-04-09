@@ -100,7 +100,7 @@
               <string>New</string>
              </property>
              <property name="checkable">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
              <property name="checked">
               <bool>false</bool>
@@ -122,7 +122,7 @@
               <string>Line</string>
              </property>
              <property name="checkable">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
              <property name="default">
               <bool>false</bool>
@@ -147,7 +147,7 @@
               <string>Rect</string>
              </property>
              <property name="checkable">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -169,7 +169,7 @@
               <string>Divide</string>
              </property>
              <property name="checkable">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -472,9 +472,6 @@
    </property>
   </action>
   <action name="actionRectangle">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
    <property name="text">
     <string>Rectangle</string>
    </property>
@@ -485,9 +482,6 @@
    </property>
   </action>
   <action name="actionLine">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
    <property name="text">
     <string>Line</string>
    </property>
@@ -513,9 +507,6 @@
    </property>
   </action>
   <action name="actiondivide">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
    <property name="text">
     <string>Divide</string>
    </property>
@@ -526,9 +517,6 @@
    </property>
   </action>
   <action name="actionNewSection">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
    <property name="text">
     <string>New section</string>
    </property>

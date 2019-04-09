@@ -75,7 +75,7 @@ void commandWidget::slotGetText()
     }
     if (m_DivideMode)
     {
-        QRegularExpression reg2("[0-9]*+\\n");
+        QRegularExpression reg2("[0-9]+\\n");
         QRegularExpressionMatch match2=reg2.match(m_strCommand);
         if (match2.hasMatch())
         {

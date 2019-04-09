@@ -55,34 +55,36 @@ void Scene::slotGetCommand(QString str)
             m_isRect=false;
 //            double a1, a2, angle;
 //            int pSize=m_concretePoints.size()-1;
-//            if (m_concretePoints[0].x()==m_concretePoints[1].x())
+//            if (m_concretePoints[0].x()==m_concretePoints[1].x())   //first line and X axis are parallel
 //            {
 //                if(m_concretePoints[0].y()<m_concretePoints[1].y())
 //                {a1=M_PI_2;}
 //                else
-//                {a1=-M_PI_2;}
+//                {a1=M_PI+M_PI_2;}
 //            }
-//            else if(m_concretePoints[0].x()<m_concretePoints[1].x())
+//            else if(m_concretePoints[0].x()<m_concretePoints[1].x())    //first line is in positive half of X axis
 //            {
 //                a1=qAtan((m_concretePoints[1].y()-m_concretePoints[0].y())/(m_concretePoints[1].x()-m_concretePoints[0].x()));
 //            }
-//            else {
+//            else {                                                      //first line is in negative half of X axis
 //                a1=M_PI+qAtan((m_concretePoints[1].y()-m_concretePoints[0].y())/(m_concretePoints[1].x()-m_concretePoints[0].x()));
 //            }
-//            if (m_concretePoints[0].x()==m_concretePoints[pSize].x())
+//            if(a1<0){a1=2*M_PI+a1;}
+//            if (m_concretePoints[0].x()==m_concretePoints[pSize].x())   //last line and X axis are parallel
 //            {
 //                if(m_concretePoints[0].y()<m_concretePoints[pSize].y())
 //                {a2=M_PI_2;}
 //                else
-//                {a2=-M_PI_2;}
+//                {a2=M_PI+M_PI_2;}
 //            }
-//            else if(m_concretePoints[0].x()<m_concretePoints[pSize].x())
+//            else if(m_concretePoints[0].x()<m_concretePoints[pSize].x())    //last line is in positive half of X axis
 //            {
 //                a2=qAtan((m_concretePoints[pSize].y()-m_concretePoints[0].y())/(m_concretePoints[pSize].x()-m_concretePoints[0].x()));
 //            }
-//            else {
+//            else {                                                          //last line is in negative half of X axis
 //                a2=M_PI+qAtan((m_concretePoints[pSize].y()-m_concretePoints[0].y())/(m_concretePoints[pSize].x()-m_concretePoints[0].x()));
 //            }
+//            if(a2<0){a2=2*M_PI+a2;}
 //            angle=a2-a1;
 //            if(angle<M_PI)
 //            {
@@ -133,7 +135,16 @@ void Scene::slotSceneInit()
 
 void Scene::slotDivide()
 {
-
+    qDebug()<<"in slot divide";
+    m_dividedPoints.fill(QVector<QPointF>(),nXdivisions+1);
+    for (int i=0; i<=nXdivisions; ++i)
+    {
+        for (int j=0; j<=nYdivisions; ++j)
+        {
+            m_dividedPoints[i].append(QPointF(lowX+i*m_recWidth/nXdivisions,lowY+j*m_recHeight/nYdivisions));
+        }
+    }
+    drawDivisions();
 }
 
 void Scene::slotNewSection()
@@ -228,10 +239,10 @@ void Scene::drawPoint(const QPointF& point)
 
 void Scene::getSectSizes()
 {
-    double lowX=m_concretePoints[0].x();
-    double highX=m_concretePoints[0].x();
-    double lowY=m_concretePoints[0].y();
-    double highY=m_concretePoints[0].y();
+    lowX=m_concretePoints[0].x();
+    highX=m_concretePoints[0].x();
+    lowY=m_concretePoints[0].y();
+    highY=m_concretePoints[0].y();
     for (QPointF p: m_concretePoints)
     {
         if (p.x()<lowX)
@@ -246,6 +257,25 @@ void Scene::getSectSizes()
     m_recWidth=highX-lowX;
     m_recHeight=highY-lowY;
     //this->setSceneRect(lowX-m_viewMargin,lowY-m_viewMargin,m_recWidth+m_viewMargin, m_recHeight+m_viewMargin);
+
+}
+
+void Scene::drawDivisions()
+{
+    qDebug()<<"in Draw divisions method";
+    pen.setBrush(Qt::blue);
+    // pen.setWidth(1);
+    brush.setColor(Qt::yellow); //не работает
+    for (int i=1; i<=nXdivisions; ++i)
+    {
+        for (int j=1; j<=nYdivisions; ++j)
+        {
+            QRectF r=QRectF(m_dividedPoints[i-1][j-1].x(),m_dividedPoints[i-1][j-1].y(),(m_dividedPoints[i][j].x()-m_dividedPoints[i-1][j].x()),(m_dividedPoints[i][j].y()-m_dividedPoints[i][j-1].y()));
+            m_divisionItems.append(this->addRect(r,pen,brush));
+            qDebug()<<"x:"+QString::number(m_dividedPoints[i][j].x())+" y:"+ QString::number(m_dividedPoints[i][j].y());
+        }
+    }
+    qDebug()<<"Draw divisions is finished";
 }
 
 void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)

@@ -20,10 +20,10 @@ MainWindow::MainWindow(QWidget *parent) :
     QCursor cursor;
     cursor.setShape(Qt::CrossCursor);
     ui->graphicsView->setCursor(cursor);
-    QObject::connect(ui->drawLineButton, SIGNAL(toggled(bool)),this, SLOT(drawLineToggled(bool)));          //drawline event
-    QObject::connect(ui->drawRectButton, SIGNAL(toggled(bool)),this, SLOT(drawRectToggled(bool)));          //drawRectangle event
-    QObject::connect(ui->divideButton, SIGNAL(toggled(bool)), this, SLOT(divideToggled(bool)));             //divide section event
-    QObject::connect(ui->newButton, SIGNAL(toggled(bool)), this, SLOT(newSectionToggled(bool)));            // new section event
+    QObject::connect(ui->drawLineButton, SIGNAL(clicked()),ui->actionLine, SLOT(trigger()));          //drawline event
+    QObject::connect(ui->drawRectButton, SIGNAL(clicked()),ui->actionRectangle, SLOT(trigger()));          //drawRectangle event
+    QObject::connect(ui->divideButton, SIGNAL(clicked()), ui->actiondivide, SLOT(trigger()));             //divide section event
+    QObject::connect(ui->newButton, SIGNAL(clicked()), ui->actionNewSection, SLOT(trigger()));            // new section event
     QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->drawLineButton, SLOT(setEnabled(bool)));    //enable/disable drawLine Button
     QObject::connect(myScene, SIGNAL(signalSceneCleared(bool)), ui->drawLineButton, SLOT(setEnabled(bool)));
     QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->drawRectButton, SLOT(setEnabled(bool)));    //enable/disable drawRectangle Button
@@ -67,29 +67,29 @@ void MainWindow::setSceneSize()
 
 }
 
-void MainWindow::drawLineToggled(bool b)
-{
-    if (b)
-    {emit ui->actionLine->triggered();}
-}
+//void MainWindow::drawLineToggled(bool b)
+//{
+//    if (b)
+//    {emit ui->actionLine->triggered();}
+//}
 
-void MainWindow::drawRectToggled(bool b)
-{
-    if (b)
-    {emit ui->actionRectangle->triggered();}
-}
+//void MainWindow::drawRectToggled(bool b)
+//{
+//    if (b)
+//    {emit ui->actionRectangle->triggered();}
+//}
 
-void MainWindow::divideToggled(bool b)
-{
-    if (b)
-    {emit ui->actiondivide->triggered();}
-}
+//void MainWindow::divideToggled(bool b)
+//{
+//    if (b)
+//    {emit ui->actiondivide->triggered();}
+//}
 
-void MainWindow::newSectionToggled(bool b)
-{
-    if (b)
-    {emit ui->actionNewSection->triggered();}
-}
+//void MainWindow::newSectionToggled(bool b)
+//{
+//    if (b)
+//    {emit ui->actionNewSection->triggered();}
+//}
 
 void MainWindow::slotFitView()
 {

@@ -23,10 +23,10 @@ public:
 
 public slots:
     void setSceneSize();
-    void drawLineToggled(bool);
-    void drawRectToggled(bool);
-    void divideToggled(bool);
-    void newSectionToggled(bool);
+//    void drawLineToggled(bool);
+//    void drawRectToggled(bool);
+//    void divideToggled(bool);
+//    void newSectionToggled(bool);
     void slotFitView();
     void slotCoordChanged(QPointF);
 
