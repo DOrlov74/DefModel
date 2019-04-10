@@ -137,11 +137,150 @@ void Scene::slotDivide()
 {
     qDebug()<<"in slot divide";
     m_dividedPoints.fill(QVector<QPointF>(),nXdivisions+1);
-    for (int i=0; i<=nXdivisions; ++i)
+    if (m_isRect)       //simple divide
     {
-        for (int j=0; j<=nYdivisions; ++j)
+        for (int i=0; i<=nXdivisions; ++i)
         {
-            m_dividedPoints[i].append(QPointF(lowX+i*m_recWidth/nXdivisions,lowY+j*m_recHeight/nYdivisions));
+            for (int j=0; j<=nYdivisions; ++j)
+            {
+                m_dividedPoints[i].append(QPointF(lowX+i*m_recWidth/nXdivisions,lowY+j*m_recHeight/nYdivisions));
+            }
+        }
+    }
+    else                //divide custom polygon
+    {
+        QVector<QVector<QPointF>> vIntersectX;  //vector to store points of intersection with X axis of divisions
+        vIntersectX.fill(QVector<QPointF>(),2);
+        vIntersectX[0].fill(QPointF(0,0),nXdivisions+1);
+        vIntersectX[1].fill(QPointF(0,0),nXdivisions+1);
+        double x, y, x1, x2, y1, y2;
+        for (int i=0; i<nXdivisions+1; ++i)
+        {
+            x=lowX+i*m_recWidth/nXdivisions;
+            qDebug()<<"curent x:"+QString::number(x);
+            for (int j=1; j<m_concretePoints.size(); ++j)
+            {
+                x1=m_concretePoints[j].x();
+                x2=m_concretePoints[j-1].x();
+                y1=m_concretePoints[j].y();
+                y2=m_concretePoints[j-1].y();
+                if((x<=x1&&x>=x2)||(x>=x1&&x<=x2))
+                {
+                   if(x==x1){y=y1;}
+                   else if(x==x2){y=y2;}
+                   else
+                   {
+                       y=(y1-y2)/(x1-x2)*x+(x1*y2-x2*y1)/(x1-x2);
+                    }
+                    qDebug()<<"intersection is at y:"+QString::number(y);
+                    if (vIntersectX[0][i].x()==0&&vIntersectX[0][i].y()==0)
+                    {
+                        vIntersectX[0][i]=QPointF(x,y);
+                        qDebug()<<"Point added in line 1";
+                    }
+                    else
+                    {
+                        vIntersectX[1][i]=QPointF(x,y);
+                        qDebug()<<"Point added in line 2";
+                    }
+                }
+            }
+            x1=m_concretePoints[m_concretePoints.size()-1].x();
+            x2=m_concretePoints[0].x();
+            y1=m_concretePoints[m_concretePoints.size()-1].y();
+            y2=m_concretePoints[0].y();
+            if((x<=x1&&x>=x2)||(x>=x1&&x<=x2))
+            {
+               if(x==x1){y=y1;}
+               else if(x==x2){y=y2;}
+               else
+               {
+                   y=(y1-y2)/(x1-x2)*x+(x1*y2-x2*y1)/(x1-x2);
+                }
+                qDebug()<<"last intersection is at y:"+QString::number(y);
+                if (vIntersectX[0][i].x()==0&&vIntersectX[0][i].y()==0)
+                {
+                    vIntersectX[0][i]=QPointF(x,y);
+                    qDebug()<<"Point added in line 1";
+                }
+                else
+                {
+                    vIntersectX[1][i]=QPointF(x,y);
+                    qDebug()<<"Point added in line 2";
+                }
+            }
+        }
+//        qDebug()<<"Intersections line 1:\n";
+//        for (int i=0; i<vIntersectX[0].size(); ++i)
+//        {
+//            qDebug()<<"x:"+QString::number(vIntersectX[0][i].x());
+//            qDebug()<<" y:"+QString::number(vIntersectX[0][i].y());
+//        }
+//        qDebug()<<"Intersections line 2:\n";
+//        for (int i=0; i<vIntersectX[1].size(); ++i)
+//        {
+//            qDebug()<<"x:"+QString::number(vIntersectX[1][i].x());
+//            qDebug()<<" y:"+QString::number(vIntersectX[1][i].y());
+//        }
+        QVector<QVector<QPointF>> vIntersectY;  //vector to store points of intersection with Y axis of divisions
+        vIntersectY.fill(QVector<QPointF>(),2);
+        vIntersectY[0].fill(QPointF(0,0),nYdivisions+1);
+        vIntersectY[1].fill(QPointF(0,0),nYdivisions+1);
+        for (int i=0; i<nYdivisions+1; ++i)
+        {
+            y=lowY+i*m_recHeight/nYdivisions;
+            qDebug()<<"curent y:"+QString::number(x);
+            for (int j=1; j<m_concretePoints.size(); ++j)
+            {
+                x1=m_concretePoints[j].x();
+                x2=m_concretePoints[j-1].x();
+                y1=m_concretePoints[j].y();
+                y2=m_concretePoints[j-1].y();
+                if((y<=y1&&y>=y2)||(y>=y1&&y<=y2))
+                {
+                   if(y==y1){x=x1;}
+                   else if(y==y2){x=x2;}
+                   else
+                   {
+                       x=(x1-x2)/(y1-y2)*y+(y1*x2-y2*x1)/(y1-y2);
+                    }
+                    qDebug()<<"intersection is at x:"+QString::number(x);
+                    if (vIntersectY[0][i].x()==0&&vIntersectY[0][i].y()==0)
+                    {
+                        vIntersectY[0][i]=QPointF(x,y);
+                        qDebug()<<"Point added in line 1";
+                    }
+                    else
+                    {
+                        vIntersectY[1][i]=QPointF(x,y);
+                        qDebug()<<"Point added in line 2";
+                    }
+                }
+            }
+            x1=m_concretePoints[m_concretePoints.size()-1].x();
+            x2=m_concretePoints[0].x();
+            y1=m_concretePoints[m_concretePoints.size()-1].y();
+            y2=m_concretePoints[0].y();
+            if((y<=y1&&y>=y2)||(y>=y1&&y<=y2))
+            {
+               if(y==y1){x=x1;}
+               else if(y==y2){x=x2;}
+               else
+               {
+                   x=(x1-x2)/(y1-y2)*y+(y1*x2-y2*x1)/(y1-y2);
+                }
+                qDebug()<<"last intersection is at x:"+QString::number(x);
+                if (vIntersectY[0][i].x()==0&&vIntersectY[0][i].y()==0)
+                {
+                    vIntersectY[0][i]=QPointF(x,y);
+                    qDebug()<<"Point added in line 1";
+                }
+                else
+                {
+                    vIntersectY[1][i]=QPointF(x,y);
+                    qDebug()<<"Point added in line 2";
+                }
+            }
         }
     }
     drawDivisions();
@@ -263,16 +402,19 @@ void Scene::getSectSizes()
 void Scene::drawDivisions()
 {
     qDebug()<<"in Draw divisions method";
-    pen.setBrush(Qt::blue);
-    // pen.setWidth(1);
-    brush.setColor(Qt::yellow); //не работает
-    for (int i=1; i<=nXdivisions; ++i)
+    if (m_isRect)       //simple rectangle
     {
-        for (int j=1; j<=nYdivisions; ++j)
+        pen.setBrush(Qt::blue);
+        // pen.setWidth(1);
+        brush.setColor(Qt::yellow); //не работает
+        for (int i=1; i<=nXdivisions; ++i)
         {
-            QRectF r=QRectF(m_dividedPoints[i-1][j-1].x(),m_dividedPoints[i-1][j-1].y(),(m_dividedPoints[i][j].x()-m_dividedPoints[i-1][j].x()),(m_dividedPoints[i][j].y()-m_dividedPoints[i][j-1].y()));
-            m_divisionItems.append(this->addRect(r,pen,brush));
-            qDebug()<<"x:"+QString::number(m_dividedPoints[i][j].x())+" y:"+ QString::number(m_dividedPoints[i][j].y());
+            for (int j=1; j<=nYdivisions; ++j)
+            {
+                QRectF r=QRectF(m_dividedPoints[i-1][j-1].x(),m_dividedPoints[i-1][j-1].y(),(m_dividedPoints[i][j].x()-m_dividedPoints[i-1][j].x()),(m_dividedPoints[i][j].y()-m_dividedPoints[i][j-1].y()));
+                m_divisionItems.append(this->addRect(r,pen,brush));
+                qDebug()<<"x:"+QString::number(m_dividedPoints[i][j].x())+" y:"+ QString::number(m_dividedPoints[i][j].y());
+            }
         }
     }
     qDebug()<<"Draw divisions is finished";
