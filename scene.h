@@ -17,13 +17,15 @@ class Scene : public QGraphicsScene
     bool m_doneConcretePath=false;
     QVector<QPointF> m_concretePoints;  //Points of concrete section in GraphicsScene coordinats
     QVector<QVector<QPointF>> m_dividedPoints;   //Points of divided elements in GraphicsScene coordinats
+    QVector<QVector<QVector<QPointF>>> m_dividedRegions;   //Points of divided regions in GraphicsScene coordinats
     QPainterPath* m_concretePath;       //Path to draw concrete section
     QPen pen;
     QBrush brush;
     uint m_pointSize=5;
     QGraphicsEllipseItem* m_currentItem;
     QList<QGraphicsItem*> m_pointsItems;    //List to store points of concrete section
-    QList<QGraphicsRectItem*> m_divisionItems;    //List to store divided elements of concrete section
+    QList<QGraphicsRectItem*> m_divisionItems;    //List to store divided rectangles of concrete section
+    QList<QGraphicsPathItem*> m_divisionPaths;    //List to store divided paths of concrete section
     //QGraphicsItemGroup* m_pointsGroup;
     QPointF m_basePoint;                    //Point to transform coordinats for display
     double m_recWidth;      //Actual size of concrete section
