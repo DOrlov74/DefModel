@@ -133,7 +133,7 @@ void Scene::slotSceneInit()
     qDebug()<<"scene base point: "<<m_basePoint;
 }
 
-void Scene::slotDivide()
+void Scene::Divide()
 {
     qDebug()<<"in slot divide";
     m_dividedPoints.fill(QVector<QPointF>(),nXdivisions+1);
@@ -314,56 +314,71 @@ void Scene::slotDivide()
                     lowInterX2=vIntersectX[1][i];
                     highInterX2=vIntersectX[0][i];
                 }
-                if(vIntersectY[0][i-1].x()<vIntersectY[1][i-1].x())
+                if(vIntersectY[0][j-1].x()<vIntersectY[1][j-1].x())
                 {
-                    lowInterY1=vIntersectY[0][i-1];
-                    highInterY1=vIntersectY[1][i-1];
+                    lowInterY1=vIntersectY[0][j-1];
+                    highInterY1=vIntersectY[1][j-1];
                 }
                 else
                 {
-                    lowInterY1=vIntersectY[1][i-1];
-                    highInterY1=vIntersectY[0][i-1];
+                    lowInterY1=vIntersectY[1][j-1];
+                    highInterY1=vIntersectY[0][j-1];
                 }
-                if(vIntersectY[0][i].x()<vIntersectY[1][i].x())
+                if(vIntersectY[0][j].x()<vIntersectY[1][j].x())
                 {
-                    lowInterY2=vIntersectY[0][i];
-                    highInterY2=vIntersectY[1][i];
+                    lowInterY2=vIntersectY[0][j];
+                    highInterY2=vIntersectY[1][j];
                 }
                 else
                 {
-                    lowInterY2=vIntersectY[1][i];
-                    highInterY2=vIntersectY[0][i];
+                    lowInterY2=vIntersectY[1][j];
+                    highInterY2=vIntersectY[0][j];
                 }
-                if(lowInterX1.y()>=y1&&lowInterX1.y()<=y2)     //low intersection is on the line with x=x1
+                if(lowInterX1.y()>=y1&&lowInterX1.y()<=y2)                                        //low intersection is on the line with x=x1
                 {m_dividedRegions[i-1][j-1].append(QPointF(x1,lowInterX1.y()));}
-                if(highInterX1.y()>=y1&&highInterX1.y()<=y2)     //high intersection is on the line with x=x1
+                if(highInterX1.y()>=y1&&highInterX1.y()<=y2&&lowInterX1.y()!=highInterX1.y())     //high intersection is on the line with x=x1
                 {m_dividedRegions[i-1][j-1].append(QPointF(x1,highInterX1.y()));}
-                if((lowInterX1.y()<y1&&highInterX1.y()>y2)&&(lowInterY1.x()<x1&&highInterY1.x()>x1))   //point x1,y1 is inside the figure
+                if((lowInterX1.y()<y1&&highInterX1.y()>y1)&&(lowInterY1.x()<x1&&highInterY1.x()>x1))   //point x1,y1 is inside the figure
                 {m_dividedRegions[i-1][j-1].append(QPointF(x1,y1));}
-                if(lowInterY1.x()>x1&&lowInterY1.x()<x2)     //low intersection is on the line with y=y1
+                if(lowInterY1.x()>x1&&lowInterY1.x()<x2)                                            //low intersection is on the line with y=y1
                 {m_dividedRegions[i-1][j-1].append(QPointF(lowInterY1.x(),y1));}
-                if(highInterY1.x()>x1&&highInterY1.x()<x2)     //high intersection is on the line with y=y1
+                if(highInterY1.x()>x1&&highInterY1.x()<x2&&lowInterY1.x()!=highInterY1.x())         //high intersection is on the line with y=y1
                 {m_dividedRegions[i-1][j-1].append(QPointF(highInterY1.x(),y1));}
-                if((lowInterX2.y()<y1&&highInterX2.y()>y2)&&(lowInterY1.x()<x1&&highInterY1.x()>x2))   //point x2,y1 is inside the figure
+                if((lowInterX2.y()<y1&&highInterX2.y()>y1)&&(lowInterY1.x()<x2&&highInterY1.x()>x2))   //point x2,y1 is inside the figure
                 {m_dividedRegions[i-1][j-1].append(QPointF(x2,y1));}
-                if(lowInterX2.y()>=y1&&lowInterX2.y()<=y2)     //low intersection is on the line with x=x2
+                if(lowInterX2.y()>=y1&&lowInterX2.y()<=y2)                                          //low intersection is on the line with x=x2
                 {m_dividedRegions[i-1][j-1].append(QPointF(x2,lowInterX2.y()));}
-                if(highInterX2.y()>=y1&&highInterX2.y()<=y2)     //high intersection is on the line with x=x2
+                if(highInterX2.y()>=y1&&highInterX2.y()<=y2&&lowInterX2.y()!=highInterX2.y())       //high intersection is on the line with x=x2
                 {m_dividedRegions[i-1][j-1].append(QPointF(x2,highInterX2.y()));}
-                if((highInterX2.y()<y1&&highInterX2.y()>y2)&&(lowInterY2.x()<x1&&highInterY2.x()>x2))   //point x2,y2 is inside the figure
+                if((lowInterX2.y()<y2&&highInterX2.y()>y2)&&(lowInterY2.x()<x2&&highInterY2.x()>x2))   //point x2,y2 is inside the figure
                 {m_dividedRegions[i-1][j-1].append(QPointF(x2,y2));}
-                if(lowInterY2.x()>x1&&lowInterY2.x()<x2)     //low intersection is on the line with y=y2
+                if(lowInterY2.x()>x1&&lowInterY2.x()<x2)                                            //low intersection is on the line with y=y2
                 {m_dividedRegions[i-1][j-1].append(QPointF(lowInterY2.x(),y2));}
-                if(highInterY2.x()>x1&&highInterY2.x()<x2)     //high intersection is on the line with y=y2
+                if(highInterY2.x()>x1&&highInterY2.x()<x2&&lowInterY2.x()!=highInterY2.x())         //high intersection is on the line with y=y2
                 {m_dividedRegions[i-1][j-1].append(QPointF(highInterY2.x(),y2));}
-                if((lowInterX1.y()<y1&&highInterX1.y()>y2)&&(lowInterY2.x()<x1&&highInterY2.x()>x2))   //point x1,y2 is inside the figure
-                {m_dividedRegions[i-1][j-1].append(QPointF(x2,y2));}
+                if((lowInterX1.y()<y2&&highInterX1.y()>y2)&&(lowInterY2.x()<x1&&highInterY2.x()>x1))   //point x1,y2 is inside the figure
+                {m_dividedRegions[i-1][j-1].append(QPointF(x1,y2));}
                 for (int k=0; k<m_concretePoints.size(); ++k)
                 {
                     if ((m_concretePoints[k].x()>x1&&m_concretePoints[k].x()<x2)&&(m_concretePoints[k].y()>y1&&m_concretePoints[k].y()<y2))
-                    {m_dividedRegions[i-1][j-1].append(QPointF(m_concretePoints[k].x(),m_concretePoints[k].y()));}
+                    {
+                        m_dividedRegions[i-1][j-1].append(QPointF(m_concretePoints[k].x(),m_concretePoints[k].y()));
+                        int num=m_dividedRegions[i-1][j-1].size()-1;
+                        if(!isBetween(m_dividedRegions[i-1][j-1][num],m_dividedRegions[i-1][j-1][0],m_dividedRegions[i-1][j-1][num-1]))
+                        {
+                            QPointF curPoint=m_dividedRegions[i-1][j-1][num];
+                            int l=0;
+                            do
+                            {
+                                m_dividedRegions[i-1][j-1][num-l]=m_dividedRegions[i-1][j-1][num-l-1];
+                                m_dividedRegions[i-1][j-1][num-l-1]=curPoint;
+                                ++l;
+                            }
+                            while((!isBetween(curPoint,m_dividedRegions[i-1][j-1][num-l+1],m_dividedRegions[i-1][j-1][num-l-1]))&&l>num);
+                        }
+                    }
                 }
-                qDebug()<<"Points of figure in row:"+QString::number(i)+" column:"+QString::number(j);
+                qDebug()<<"Points of figure in column:"+QString::number(i)+" row:"+QString::number(j);
                 for(int n=0; n<m_dividedRegions[i-1][j-1].size(); ++n)
                 {
                     qDebug()<<"x:"+QString::number(m_dividedRegions[i-1][j-1][n].x())+" y:"+QString::number(m_dividedRegions[i-1][j-1][n].y());
@@ -388,6 +403,17 @@ void Scene::slotNewSection()
     delete m_concretePath;
     m_concretePath=new QPainterPath();
     emit signalSceneCleared(true);
+}
+
+void Scene::slotDivideX(uint num)
+{
+    nXdivisions=num;
+}
+
+void Scene::slotDivideY(uint num)
+{
+    nYdivisions=num;
+    Divide();
 }
 
 QPointF Scene::toSceneCoord(const QPointF& point)
@@ -516,7 +542,7 @@ void Scene::drawDivisions()
                     qDebug()<<"drawing path at row:"+QString::number(i+1)<<"column:"<<QString::number(j);
                     QPainterPath p= QPainterPath(m_dividedRegions[i][j][0]);
                     qDebug()<<"Point added at x:"<<QString::number(m_dividedRegions[i][j][0].x())<<" y:"+QString::number(m_dividedRegions[i][j][0].y());
-                    for(int n=0; n<m_dividedRegions[i][j].size(); ++n)
+                    for(int n=1; n<m_dividedRegions[i][j].size(); ++n)
                     {
                         p.lineTo(m_dividedRegions[i][j][n]);
                         qDebug()<<"Point added at x:"<<QString::number(m_dividedRegions[i][j][n].x())<<" y:"+QString::number(m_dividedRegions[i][j][n].y());
@@ -528,6 +554,12 @@ void Scene::drawDivisions()
         }
     }
     qDebug()<<"Draw divisions is finished";
+    emit signalSceneDivided(true);
+}
+
+bool Scene::isBetween(QPointF p1, QPointF p2, QPointF p3)
+{
+    return (((p1.x()>p2.x()&&p1.x()<p3.x())||(p1.x()>p3.x()&&p1.x()<p2.x()))&&((p1.y()>p2.y()&&p1.y()<p3.y())||(p1.y()>p3.y()&&p1.y()<p2.y())));
 }
 
 void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)

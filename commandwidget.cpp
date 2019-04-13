@@ -82,35 +82,39 @@ void commandWidget::slotGetText()
             qDebug()<<"filtered command: "<<match2.captured(0);
             m_strCommand=match2.captured(0);
             m_strCommand.chop(1);
-            emit signalCommand(m_strCommand);
+            //emit signalCommand(m_strCommand);
             if (m_waitX)
             {
                 this->append("Divide> Enter number of divisions along Y axis:<10>");
                 m_waitX=false;
                 m_waitY=true;
+                emit signalDivideX(m_strCommand.toInt());
             }
             else if (m_waitY)
             {
                 this->append("Divide> ");
                 m_waitY=false;
                 m_DivideMode=false;
+                emit signalDivideY(m_strCommand.toInt());
             }
             m_strPos=this->toPlainText().size();
         }
         else if (m_strCommand=="\n")
         {
-            emit signalCommand("10");
+            //emit signalCommand("10");
             if (m_waitX)
             {
                 this->append("Divide> Enter number of divisions along Y axis:<10>");
                 m_waitX=false;
                 m_waitY=true;
+                emit signalDivideX(10);
             }
             else if (m_waitY)
             {
                 this->append("Divide> ");
                 m_waitY=false;
                 m_DivideMode=false;
+                emit signalDivideY(10);
             }
             m_strPos=this->toPlainText().size();
         }

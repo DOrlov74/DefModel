@@ -19,6 +19,8 @@ public:
 
 signals:
     void signalCommand(QString);
+    void signalDivideX(uint);
+    void signalDivideY(uint);
 
 public slots:
     void slotDrawLine();

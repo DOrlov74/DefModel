@@ -34,6 +34,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(myScene, SIGNAL(signalSceneCleared(bool)), ui->actionNewSection, SLOT(setDisabled(bool)));
     QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->divideButton, SLOT(setDisabled(bool)));     //enable/disable divide section Button
     QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->actiondivide, SLOT(setDisabled(bool)));
+    QObject::connect(myScene, SIGNAL(signalSceneDivided(bool)), ui->divideButton, SLOT(setDisabled(bool)));     //disable divide section Button
+    QObject::connect(myScene, SIGNAL(signalSceneDivided(bool)), ui->actiondivide, SLOT(setDisabled(bool)));
     QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->actionLine, SLOT(setEnabled(bool)));        //enable/disable drawLine action
     QObject::connect(myScene, SIGNAL(signalSceneCleared(bool)), ui->actionLine, SLOT(setEnabled(bool)));
     QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->actionRectangle, SLOT(setEnabled(bool)));   //enable/disable drawRectangle action
@@ -46,7 +48,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionRectangle, SIGNAL(triggered()), myScene, SLOT(setDrawRect()));               //send command drawRectangle to Scene
     QObject::connect(ui->actionRectangle, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDrawRect()));  //send command drawRectangle to textEdit
     QObject::connect(ui->actiondivide, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDivide()));       //send command divide to textEdit
-    QObject::connect(ui->actiondivide, SIGNAL(triggered()), myScene, SLOT(slotDivide()));                   //send command divide to Scene
+    QObject::connect(ui->commandTextEdit, SIGNAL(signalDivideX(uint)), myScene, SLOT(slotDivideX(uint)));   //send number of divisions on axis X to Scene
+    QObject::connect(ui->commandTextEdit, SIGNAL(signalDivideY(uint)), myScene, SLOT(slotDivideY(uint)));   //send number of divisions on axis Y to Scene
     QObject::connect(ui->actionNewSection, SIGNAL(triggered()), myScene, SLOT(slotNewSection()));           //send command new section to Scene
     QObject::connect(myScene, SIGNAL(signalPointAdded(QPointF)), ui->commandTextEdit, SLOT(slotAddPoint(QPointF))); //send added point to textEdit
     QObject::connect(this, SIGNAL(signalKeyPressed(QString)), ui->commandTextEdit, SLOT(slotAddKey(QString)));      //send command key from mainWidget to textEdit

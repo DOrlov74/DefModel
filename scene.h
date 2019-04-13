@@ -45,6 +45,8 @@ class Scene : public QGraphicsScene
     void drawPoint(const QPointF&);         //Draw points of concrete section method
     void getSectSizes();
     void drawDivisions();
+    bool isBetween(QPointF, QPointF, QPointF);
+    void Divide();
 
 public:
     explicit Scene(QWidget *parent = nullptr);
@@ -57,14 +59,16 @@ signals:
     void signalSceneInit();
     void signalCoordChanged(QPointF);
     void signalSceneCleared(bool);
+    void signalSceneDivided(bool);
 
 public slots:
     void setDrawLine();
     void setDrawRect();
     void slotGetCommand(QString);
     void slotSceneInit();
-    void slotDivide();
     void slotNewSection();
+    void slotDivideX(uint);
+    void slotDivideY(uint);
 
     // QGraphicsScene interface
 protected:
