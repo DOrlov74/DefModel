@@ -408,11 +408,13 @@ void Scene::slotNewSection()
 void Scene::slotDivideX(uint num)
 {
     nXdivisions=num;
+    qDebug()<<"number fo X axis divisions "+QString::number(num)+" received";
 }
 
 void Scene::slotDivideY(uint num)
 {
     nYdivisions=num;
+    qDebug()<<"number fo Y axis divisions "+QString::number(num)+" received";
     Divide();
 }
 
@@ -517,6 +519,7 @@ void Scene::drawDivisions()
 {
     qDebug()<<"in Draw divisions method";
     pen.setBrush(Qt::blue);
+    pen.setStyle(Qt::DotLine);
     // pen.setWidth(1);
     brush.setColor(Qt::yellow); //не работает
     if (m_isRect)       //simple rectangle

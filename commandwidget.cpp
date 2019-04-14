@@ -6,7 +6,7 @@
 commandWidget::commandWidget(QWidget *parent) : QTextEdit(parent)
 {
     this->append(">");
-    QObject::connect(this, SIGNAL(textChanged()), this, SLOT(slotGetText()));
+    QObject::connect(this, SIGNAL(textChanged()), this, SLOT(slotGetText()),Qt::QueuedConnection);
 }
 
 void commandWidget::slotDrawLine()
@@ -79,23 +79,23 @@ void commandWidget::slotGetText()
         QRegularExpressionMatch match2=reg2.match(m_strCommand);
         if (match2.hasMatch())
         {
-            qDebug()<<"filtered command: "<<match2.captured(0);
+            qDebug()<<"filtered number: "<<match2.captured(0);
             m_strCommand=match2.captured(0);
             m_strCommand.chop(1);
             //emit signalCommand(m_strCommand);
             if (m_waitX)
             {
-                this->append("Divide> Enter number of divisions along Y axis:<10>");
                 m_waitX=false;
                 m_waitY=true;
                 emit signalDivideX(m_strCommand.toInt());
+                this->append("Divide> Enter number of divisions along Y axis:<10>");
             }
             else if (m_waitY)
             {
-                this->append("Divide> ");
                 m_waitY=false;
                 m_DivideMode=false;
                 emit signalDivideY(m_strCommand.toInt());
+                this->append("> ");
             }
             m_strPos=this->toPlainText().size();
         }
@@ -104,17 +104,17 @@ void commandWidget::slotGetText()
             //emit signalCommand("10");
             if (m_waitX)
             {
-                this->append("Divide> Enter number of divisions along Y axis:<10>");
                 m_waitX=false;
                 m_waitY=true;
                 emit signalDivideX(10);
+                this->append("Divide> Enter number of divisions along Y axis:<10>");
             }
             else if (m_waitY)
             {
-                this->append("Divide> ");
                 m_waitY=false;
                 m_DivideMode=false;
                 emit signalDivideY(10);
+                this->append("> ");
             }
             m_strPos=this->toPlainText().size();
         }
