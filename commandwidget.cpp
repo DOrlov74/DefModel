@@ -23,11 +23,23 @@ void commandWidget::slotDrawRect()
     m_strPos=this->toPlainText().size();
 }
 
+void commandWidget::slotDrawPoint()
+{
+    this->append("Point> enter point >");
+    m_waitPoint=true;
+    m_drawPointMode=true;
+    m_strPos=this->toPlainText().size();
+}
+
 void commandWidget::slotAddPoint(QPointF point)
 {
     if (m_waitPoint)
     {
-        if (n_points>1)
+        if (m_drawPointMode)
+        {
+            this->append("x: "+QString::number(point.x())+" y: "+QString::number(point.y())+"> enter next point or 'd' for done >");
+        }
+        else if (n_points>1)
         {
             this->append("x: "+QString::number(point.x())+" y: "+QString::number(point.y())+"> enter next point or 'c' to close >");
         }
@@ -48,6 +60,13 @@ void commandWidget::slotAddKey(QString str)
     if (str=="c"||str=="C")
     {
         this->append("close>");
+         n_points=0;
+    }
+    else if (str=="d"||str=="D")
+    {
+        this->append("done>");
+        m_drawPointMode=false;
+         n_points=0;
     }
     else
     {

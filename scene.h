@@ -12,13 +12,16 @@ class Scene : public QGraphicsScene
     Q_OBJECT
 
     int idTimer;
-    enum drawMode{NONE, LINE, RECT, CIRCLE};
+    enum drawMode{NONE, LINE, RECT, POINT};
     drawMode m_drawMode=NONE;
     bool m_doneConcretePath=false;
+    bool m_doneReinforcement=false;
     QVector<QPointF> m_concretePoints;  //Points of concrete section in GraphicsScene coordinats
     QVector<QVector<QPointF>> m_dividedPoints;   //Points of divided elements in GraphicsScene coordinats
     QVector<QVector<QVector<QPointF>>> m_dividedRegions;   //Points of divided regions in GraphicsScene coordinats
+    QVector<QPair<uint,QPointF>> m_reinfCircles;    //conteiner to store diameter and point of every reinforcement bar
     QPainterPath* m_concretePath;       //Path to draw concrete section
+    uint m_currDiam=10;                    //current reinforcement diameter
     QPen pen;
     QBrush brush;
     uint m_pointSize=5;
@@ -26,6 +29,7 @@ class Scene : public QGraphicsScene
     QList<QGraphicsItem*> m_pointsItems;    //List to store points of concrete section
     QList<QGraphicsRectItem*> m_divisionItems;    //List to store divided rectangles of concrete section
     QList<QGraphicsPathItem*> m_divisionPaths;    //List to store divided paths of concrete section
+    QList<QGraphicsEllipseItem*> m_reinfItems;      //List to store reinforcement circles
     //QGraphicsItemGroup* m_pointsGroup;
     QPointF m_basePoint;                    //Point to transform coordinats for display
     double m_recWidth;      //Actual size of concrete section
@@ -60,10 +64,13 @@ signals:
     void signalCoordChanged(QPointF);
     void signalSceneCleared(bool);
     void signalSceneDivided(bool);
+    void signalSectDone(bool);
+    void signalReinfDone(bool);
 
 public slots:
     void setDrawLine();
     void setDrawRect();
+    void setDrawPoint();
     void slotGetCommand(QString);
     void slotSceneInit();
     void slotNewSection();

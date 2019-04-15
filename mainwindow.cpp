@@ -24,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->drawRectButton, SIGNAL(clicked()),ui->actionRectangle, SLOT(trigger()));          //drawRectangle event
     QObject::connect(ui->divideButton, SIGNAL(clicked()), ui->actiondivide, SLOT(trigger()));             //divide section event
     QObject::connect(ui->newButton, SIGNAL(clicked()), ui->actionNewSection, SLOT(trigger()));            // new section event
+    QObject::connect(ui->drawPointButton, SIGNAL(clicked()), ui->actionPoint, SLOT(trigger()));         // draw point event
+    QObject::connect(ui->newRButton, SIGNAL(clicked()), ui->actionNewReinf, SLOT(trigger()));         // new reinforcement event
     QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->drawLineButton, SLOT(setEnabled(bool)));    //enable/disable drawLine Button
     QObject::connect(myScene, SIGNAL(signalSceneCleared(bool)), ui->drawLineButton, SLOT(setEnabled(bool)));
     QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->drawRectButton, SLOT(setEnabled(bool)));    //enable/disable drawRectangle Button
@@ -42,11 +44,19 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(myScene, SIGNAL(signalSceneCleared(bool)), ui->actionRectangle, SLOT(setEnabled(bool)));
     QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->commandTextEdit, SLOT(slotDrawMode(bool))); //send a signal of changing mode to textEdit
     QObject::connect(myScene, SIGNAL(signalCoordChanged(QPointF)), this, SLOT(slotCoordChanged(QPointF)));  //get actual coordinats from Scene
+    QObject::connect(myScene, SIGNAL(signalSectDone(bool)), ui->drawPointButton, SLOT(setEnabled(bool)));     //enable draw point Button
+    QObject::connect(myScene, SIGNAL(signalSectDone(bool)), ui->actionPoint, SLOT(setEnabled(bool)));
+    QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->drawPointButton, SLOT(setDisabled(bool)));     //disable draw point Button
+    QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->actionPoint, SLOT(setDisabled(bool)));
+    QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->newRButton, SLOT(setEnabled(bool)));     //enable new reinforcement Button
+    QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->actionNewReinf, SLOT(setEnabled(bool)));
     QObject::connect(ui->actionFit_to_section, SIGNAL(triggered()), this, SLOT(slotFitView()));             //try to fit view
     QObject::connect(ui->actionLine, SIGNAL(triggered()), myScene, SLOT(setDrawLine()));                    //send command drawLine to Scene
     QObject::connect(ui->actionLine, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDrawLine()));       //send command drawLine to textEdit
     QObject::connect(ui->actionRectangle, SIGNAL(triggered()), myScene, SLOT(setDrawRect()));               //send command drawRectangle to Scene
     QObject::connect(ui->actionRectangle, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDrawRect()));  //send command drawRectangle to textEdit
+    QObject::connect(ui->actionPoint, SIGNAL(triggered()), myScene, SLOT(setDrawPoint()));               //send command drawPoint to Scene
+    QObject::connect(ui->actionPoint, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDrawPoint()));  //send command drawPoint to textEdit
     QObject::connect(ui->actiondivide, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDivide()));       //send command divide to textEdit
     QObject::connect(ui->commandTextEdit, SIGNAL(signalDivideX(uint)), myScene, SLOT(slotDivideX(uint)));   //send number of divisions on axis X to Scene
     QObject::connect(ui->commandTextEdit, SIGNAL(signalDivideY(uint)), myScene, SLOT(slotDivideY(uint)));   //send number of divisions on axis Y to Scene
@@ -108,7 +118,7 @@ void MainWindow::slotCoordChanged(QPointF point)
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     //qDebug()<<"Draw mode return "<<myScene->getDrawMode();
-    if(event->key()==Qt::Key_C)
+    if(event->key()==Qt::Key_C||event->key()==Qt::Key_D)
     {
         if(myScene->getDrawMode())
         {

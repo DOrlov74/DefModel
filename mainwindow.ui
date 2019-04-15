@@ -79,6 +79,9 @@
            <property name="leftMargin">
             <number>0</number>
            </property>
+           <property name="topMargin">
+            <number>5</number>
+           </property>
            <property name="rightMargin">
             <number>0</number>
            </property>
@@ -216,50 +219,114 @@
           <property name="title">
            <string>draw reinforcement</string>
           </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <layout class="QVBoxLayout" name="verticalLayout_4">
            <property name="spacing">
             <number>0</number>
            </property>
            <property name="leftMargin">
             <number>0</number>
            </property>
+           <property name="topMargin">
+            <number>5</number>
+           </property>
            <property name="rightMargin">
             <number>0</number>
            </property>
            <property name="bottomMargin">
-            <number>7</number>
+            <number>5</number>
            </property>
            <item>
-            <widget class="QPushButton" name="newRButton">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>50</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>New</string>
-             </property>
-            </widget>
+            <layout class="QHBoxLayout" name="horizontalLayout_10">
+             <item>
+              <widget class="QPushButton" name="newRButton">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>60</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>New</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="drawPointButton">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>60</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Point</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
            <item>
-            <widget class="QPushButton" name="drawReinfButton">
-             <property name="enabled">
-              <bool>false</bool>
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <property name="spacing">
+              <number>5</number>
              </property>
-             <property name="maximumSize">
-              <size>
-               <width>50</width>
-               <height>16777215</height>
-              </size>
+             <property name="leftMargin">
+              <number>5</number>
              </property>
-             <property name="text">
-              <string>Circle</string>
+             <property name="topMargin">
+              <number>5</number>
              </property>
-            </widget>
+             <property name="bottomMargin">
+              <number>5</number>
+             </property>
+             <item>
+              <widget class="QSpinBox" name="diameterSpinBox">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>45</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="diameterLabel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Diameter</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </widget>
@@ -479,7 +546,7 @@
     <addaction name="actionLine"/>
     <addaction name="actionRectangle"/>
     <addaction name="separator"/>
-    <addaction name="actionCircle"/>
+    <addaction name="actionNewReinf"/>
     <addaction name="actionPoint"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -548,9 +615,9 @@
     <string>Rectangle</string>
    </property>
   </action>
-  <action name="actionCircle">
+  <action name="actionNewReinf">
    <property name="text">
-    <string>Circle</string>
+    <string>New reinforcement</string>
    </property>
   </action>
   <action name="actionLine">

@@ -11,6 +11,7 @@ class commandWidget : public QTextEdit
     uint m_strPos=0;
     QString m_strCommand;
     bool m_DivideMode=false;
+    bool m_drawPointMode=false;
     bool m_waitPoint=false;
     bool m_waitX=false;
     bool m_waitY=false;
@@ -25,6 +26,7 @@ signals:
 public slots:
     void slotDrawLine();
     void slotDrawRect();
+    void slotDrawPoint();
     void slotAddPoint(QPointF);
     void slotAddKey(QString);
     void slotGetText();

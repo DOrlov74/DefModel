@@ -42,6 +42,11 @@ void Scene::setDrawRect()
     m_drawMode=RECT;
 }
 
+void Scene::setDrawPoint()
+{
+    m_drawMode=POINT;
+}
+
 void Scene::slotGetCommand(QString str)
 {
     qDebug()<<"command: "<<str;
@@ -106,10 +111,20 @@ void Scene::slotGetCommand(QString str)
             brush.setColor(Qt::yellow);
             this->addPath(*m_concretePath, pen, brush);
             emit signalDrawMode(false);
+            emit signalSectDone(true);
             getSectSizes();
         }
     }
-    if (m_drawMode!=NONE&&(m_doneConcretePath==false))
+    if (m_drawMode==POINT)
+    {
+        if (str=="d"||str=="D")
+        {
+            m_drawMode=NONE;
+            m_doneReinforcement=true;
+            emit signalReinfDone(true);
+        }
+    }
+    if (m_drawMode!=NONE&&(m_doneConcretePath==false||m_doneReinforcement==false))
     {
         QPointF p;
         QRegularExpression reg("[+-]?([0-9]*[.])?[0-9]+");
@@ -430,7 +445,8 @@ QPointF Scene::fromSceneCoord(const QPointF& point)
 
 void Scene::drawPoint(const QPointF& point)
 {
-    m_concretePoints.append(point);
+    if (m_drawMode==LINE||m_drawMode==RECT)  //we are drawing a concrete section
+    {m_concretePoints.append(point);}
 
     if (m_concretePath->currentPosition()==QPointF(0,0))
     {
@@ -447,7 +463,7 @@ void Scene::drawPoint(const QPointF& point)
             m_concretePath->lineTo(point);
             qDebug()<<"Path line to: "<<m_concretePath->currentPosition();
         }
-        else
+        else if(m_drawMode==RECT)
         {
             //we are drawing the rectangle
             m_concretePath->addRect(m_concretePoints[0].x(), m_concretePoints[0].y(),point.x()-m_concretePoints[0].x(),point.y()-m_concretePoints[0].y());
@@ -463,10 +479,10 @@ void Scene::drawPoint(const QPointF& point)
             m_drawMode=NONE;
             m_doneConcretePath=true;
             m_isRect=true;
-            if(m_concretePoints[0].x()<m_concretePoints[1].x()&&m_concretePoints[1].y()<m_concretePoints[2].y())
-            {m_leftToRight=true;}
-            else {m_leftToRight=false;}
-            qDebug()<<(m_leftToRight?"from left to right":"from right to left");
+//            if(m_concretePoints[0].x()<m_concretePoints[1].x()&&m_concretePoints[1].y()<m_concretePoints[2].y())
+//            {m_leftToRight=true;}
+//            else {m_leftToRight=false;}
+//            qDebug()<<(m_leftToRight?"from left to right":"from right to left");
             qDebug()<<"draw mode is off";
             //remove points from scene because the rectangle is finished
             for (QGraphicsItem* item: m_pointsItems)
@@ -475,6 +491,7 @@ void Scene::drawPoint(const QPointF& point)
             }
             m_pointsItems.clear();
             emit signalDrawMode(false);
+            emit signalSectDone(true);
             getSectSizes();
         }
         pen.setBrush(Qt::black);
@@ -483,12 +500,22 @@ void Scene::drawPoint(const QPointF& point)
         //this->addPolygon(m_concretePath->toFillPolygon(), pen, brush);
         this->addPath(*m_concretePath, pen, brush);
     }
-    if (m_drawMode!=NONE){
-        //we are drawing a point
-    pen.setBrush(QBrush(Qt::red));
-    m_currentItem=this->addEllipse(point.x()-m_pointSize/2, point.y()-m_pointSize/2,m_pointSize,m_pointSize,pen);
-    m_pointsItems.append(m_currentItem);
-    //m_pointsGroup->addToGroup(m_currentItem);
+    if (m_drawMode!=NONE)
+    {
+        if (m_drawMode==POINT)
+        {   //we are drawing a point as a reinforcement bar
+            pen.setBrush(QBrush(Qt::green));
+            m_currentItem=this->addEllipse(point.x()-m_currDiam/2, point.y()-m_currDiam/2,m_currDiam,m_currDiam,pen);
+            m_reinfItems.append(m_currentItem);
+            m_reinfCircles.append(QPair<uint, QPointF>(m_currDiam, point));
+        }
+        else
+        {   //we are drawing a point within concrete section
+            pen.setBrush(QBrush(Qt::red));
+            m_currentItem=this->addEllipse(point.x()-m_pointSize/2, point.y()-m_pointSize/2,m_pointSize,m_pointSize,pen);
+            m_pointsItems.append(m_currentItem);
+            //m_pointsGroup->addToGroup(m_currentItem);
+        }
     }
 }
 
@@ -569,7 +596,7 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if(event->button()==Qt::LeftButton)
     {
-        if (m_drawMode!=NONE&&(m_doneConcretePath==false))
+        if (m_drawMode!=NONE&&(m_doneConcretePath==false||m_doneReinforcement==false))
         {
             //drawMode is on and concrete path is not closed yet
             qDebug()<<"Mouse at: "<<event->scenePos();
