@@ -4,6 +4,7 @@
 #include <QKeyEvent>
 #include <QKeySequence>
 #include <QDebug>
+#include <QIntValidator>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -61,12 +62,20 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->commandTextEdit, SIGNAL(signalDivideX(uint)), myScene, SLOT(slotDivideX(uint)));   //send number of divisions on axis X to Scene
     QObject::connect(ui->commandTextEdit, SIGNAL(signalDivideY(uint)), myScene, SLOT(slotDivideY(uint)));   //send number of divisions on axis Y to Scene
     QObject::connect(ui->actionNewSection, SIGNAL(triggered()), myScene, SLOT(slotNewSection()));           //send command new section to Scene
+    QObject::connect(ui->actionNewReinf, SIGNAL(triggered()), myScene, SLOT(slotNewReinf()));           //send command new reinforcement to Scene
+    QObject::connect(myScene, SIGNAL(signalReinfCleared(bool)), ui->drawPointButton, SLOT(setEnabled(bool)));   //enable draw Point button
+    QObject::connect(myScene, SIGNAL(signalReinfCleared(bool)), ui->newRButton, SLOT(setDisabled(bool)));       //disable new reinforcement button
+    QObject::connect(myScene, SIGNAL(signalReinfCleared(bool)), ui->actionPoint, SLOT(setEnabled(bool)));   //enable draw Point action
+    QObject::connect(myScene, SIGNAL(signalReinfCleared(bool)), ui->actionNewReinf, SLOT(setDisabled(bool)));       //disable new reinforcement action
+    //QObject::connect(myScene, SIGNAL(signalGetRDiameter(int)), ui->diameterSpinBox, SLOT(setValue(int)));   //set current diameter in spinBox //не работает
+    QObject::connect(ui->diameterSpinBox, SIGNAL(valueChanged(int)), myScene, SLOT(slotSetRDiameter(int))); //get current diameter from spinBox
     QObject::connect(myScene, SIGNAL(signalPointAdded(QPointF)), ui->commandTextEdit, SLOT(slotAddPoint(QPointF))); //send added point to textEdit
     QObject::connect(this, SIGNAL(signalKeyPressed(QString)), ui->commandTextEdit, SLOT(slotAddKey(QString)));      //send command key from mainWidget to textEdit
     QObject::connect(this, SIGNAL(signalKeyPressed(QString)), myScene, SLOT(slotGetCommand(QString)));              //send command key from mainWidget to Scene
     QObject::connect(ui->commandTextEdit, SIGNAL(signalCommand(QString)), myScene, SLOT(slotGetCommand(QString)));  //send command key from textEdit to Scene
     QObject::connect(ui->graphicsView, SIGNAL(signalViewInit()), myScene, SLOT(slotSceneInit()), Qt::QueuedConnection); //try to get actual size of Scene не работает
     QObject::connect(ui->graphicsView, SIGNAL(signalViewInit()), this, SLOT(setSceneSize()), Qt::QueuedConnection);     //try to get actual size of Scene  не работает
+    ui->diameterSpinBox->setValue(myScene->getCurrDiam());
 }
 
 MainWindow::~MainWindow()

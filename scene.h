@@ -56,6 +56,7 @@ public:
     explicit Scene(QWidget *parent = nullptr);
     drawMode getDrawMode();
     void setBasePoint(QPointF);
+    int getCurrDiam();
 
 signals:
     void signalDrawMode(bool);
@@ -66,6 +67,8 @@ signals:
     void signalSceneDivided(bool);
     void signalSectDone(bool);
     void signalReinfDone(bool);
+    void signalReinfCleared(bool);
+    //void signalGetRDiameter(int);
 
 public slots:
     void setDrawLine();
@@ -76,6 +79,8 @@ public slots:
     void slotNewSection();
     void slotDivideX(uint);
     void slotDivideY(uint);
+    void slotSetRDiameter(int);
+    void slotNewReinf();
 
     // QGraphicsScene interface
 protected:

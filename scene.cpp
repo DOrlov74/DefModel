@@ -18,7 +18,8 @@ Scene::Scene(QWidget *parent) : QGraphicsScene(parent)
     m_concretePath->setFillRule(Qt::WindingFill);
     //QObject::connect(this, SIGNAL(signalSceneInit()), this, SLOT(slotSceneInit()), Qt::QueuedConnection);
     //idTimer=startTimer(50);
-
+    //emit signalGetRDiameter(m_currDiam);
+    //qDebug()<<"Current diameter:"+QString::number(m_currDiam);
 }
 
 Scene::drawMode Scene::getDrawMode()
@@ -30,6 +31,32 @@ void Scene::setBasePoint(QPointF point)
 {
     m_basePoint=point;
     qDebug()<<"scene base point: "<<m_basePoint;
+}
+
+int Scene::getCurrDiam()
+{
+    return m_currDiam;
+}
+
+void Scene::slotSetRDiameter(int i)
+{
+    m_currDiam=i;
+    qDebug()<<"Current diameter:"+QString::number(m_currDiam);
+}
+
+void Scene::slotNewReinf()
+{
+    qDebug()<<"in new reinforcement method";
+    int i=0;
+    for (QGraphicsEllipseItem* item: m_reinfItems)
+    {this->removeItem(item);
+    qDebug()<<"reinforcement item " + QString::number(i) + " removed";
+    delete item;
+    ++i;
+    }
+    m_reinfCircles.erase(m_reinfCircles.begin(),m_reinfCircles.end());
+    m_doneReinforcement=false;
+    emit signalReinfCleared(true);
 }
 
 void Scene::setDrawLine()
