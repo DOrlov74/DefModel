@@ -10,7 +10,7 @@
 #include <QRegularExpression>
 #include <QString>
 #include <QtMath>
-
+#include <cmath>
 
 Scene::Scene(QWidget *parent) : QGraphicsScene(parent)
 {
@@ -20,6 +20,7 @@ Scene::Scene(QWidget *parent) : QGraphicsScene(parent)
     //idTimer=startTimer(50);
     //emit signalGetRDiameter(m_currDiam);
     //qDebug()<<"Current diameter:"+QString::number(m_currDiam);
+    myCalc=new Calculation;
 }
 
 Scene::drawMode Scene::getDrawMode()
@@ -59,14 +60,85 @@ void Scene::slotNewReinf()
     emit signalReinfCleared(true);
 }
 
+void Scene::slotCalculate()
+{
+    qDebug()<<"in Calculate Slot";
+    myCalc->setXdivision(nXdivisions);
+    myCalc->setYdivision(nYdivisions);
+    m_concreteArea.fill(QVector<double>(),nXdivisions);
+    m_concreteCenter.fill(QVector<QPointF>(),nXdivisions);
+    if (m_isRect)
+    {
+        double dWidth;
+        double dHeight;
+        for (int i=1; i<m_dividedPoints.size(); ++i)
+        {
+            m_concreteArea[i-1].fill(0,nYdivisions);
+            m_concreteCenter[i-1].fill(QPointF(0,0),nYdivisions);
+            for (int j=1; j<m_dividedPoints[i].size();++j)
+            {
+                dWidth=qSqrt(qPow((m_dividedPoints[i][j-1].x()-m_dividedPoints[i-1][j-1].x()),2)+qPow((m_dividedPoints[i][j-1].y()-m_dividedPoints[i-1][j-1].y()),2));
+                dHeight=qSqrt(qPow((m_dividedPoints[i-1][j].x()-m_dividedPoints[i-1][j-1].x()),2)+qPow((m_dividedPoints[i-1][j].y()-m_dividedPoints[i-1][j-1].y()),2));
+                m_concreteArea[i-1][j-1]=dWidth*dHeight;
+                m_concreteCenter[i-1][j-1].setX((m_dividedPoints[i-1][j-1].x()+m_dividedPoints[i][j-1].x()+m_dividedPoints[i-1][j].x()+m_dividedPoints[i][j].x())/4);
+                m_concreteCenter[i-1][j-1].setY((m_dividedPoints[i-1][j-1].y()+m_dividedPoints[i][j-1].y()+m_dividedPoints[i-1][j].y()+m_dividedPoints[i][j].y())/4);
+            }
+        }
+    }
+    else
+    {
+        double dSum1=0;
+        double dSum2=0;
+        double dSumX=0;
+        double dSumY=0;
+        int iSize;
+        for (int i=0; i<m_dividedRegions.size(); ++i)
+        {
+            m_concreteArea[i].fill(0,nYdivisions);
+            m_concreteCenter[i].fill(QPointF(0,0),nYdivisions);
+            for (int j=0; j<m_dividedRegions[i].size();++j)
+            {
+                iSize=m_dividedRegions[i][j].size();
+                for (int k=0; k<iSize-1;++k)
+                {
+                    dSum1+=m_dividedRegions[i][j][k].x()*m_dividedRegions[i][j][k+1].y();
+                    dSum2+=m_dividedRegions[i][j][k+1].x()*m_dividedRegions[i][j][k].y();
+                    dSumX+=m_dividedRegions[i][j][k].x();
+                    dSumY+=m_dividedRegions[i][j][k].y();
+                }
+                if (iSize!=0)
+                {
+                    m_concreteArea[i][j]=0.5*abs(dSum1+m_dividedRegions[i][j][iSize-1].x()*m_dividedRegions[i][j][0].y()-dSum2-m_dividedRegions[i][j][0].x()*m_dividedRegions[i][j][iSize-1].y());
+                    m_concreteCenter[i][j].setX(dSumX/iSize);
+                    m_concreteCenter[i][j].setY(dSumY/iSize);
+                    dSum1=0;
+                    dSum2=0;
+                    dSumX=0;
+                    dSumY=0;
+                }
+                else
+                {
+                    m_concreteArea[i][j]=0;
+                }
+
+            }
+        }
+    }
+    myCalc->setConcreteArea(m_concreteArea);
+    myCalc->setConcreteCenter(m_concreteCenter);
+    myCalc->setReinfArea(m_reinfCircles);
+}
+
 void Scene::setDrawLine()
 {
     m_drawMode=LINE;
+    emit signalDrawMode(true);
 }
 
 void Scene::setDrawRect()
 {
     m_drawMode=RECT;
+    emit signalDrawMode(true);
 }
 
 void Scene::setDrawPoint()

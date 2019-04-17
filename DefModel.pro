@@ -29,13 +29,15 @@ SOURCES += \
         mainwindow.cpp \
     scene.cpp \
     commandwidget.cpp \
-    view.cpp
+    view.cpp \
+    calculation.cpp
 
 HEADERS += \
         mainwindow.h \
     scene.h \
     commandwidget.h \
-    view.h
+    view.h \
+    calculation.h
 
 FORMS += \
         mainwindow.ui

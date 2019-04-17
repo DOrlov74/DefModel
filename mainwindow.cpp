@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //myScene->setBasePoint(QPointF(10,myScene->height()-10));
     ui->actionNewSection->setDisabled(true);
     ui->actiondivide->setDisabled(true);
+    ui->actionCalculate->setDisabled(true);
     QCursor cursor;
     cursor.setShape(Qt::CrossCursor);
     ui->graphicsView->setCursor(cursor);
@@ -27,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->newButton, SIGNAL(clicked()), ui->actionNewSection, SLOT(trigger()));            // new section event
     QObject::connect(ui->drawPointButton, SIGNAL(clicked()), ui->actionPoint, SLOT(trigger()));         // draw point event
     QObject::connect(ui->newRButton, SIGNAL(clicked()), ui->actionNewReinf, SLOT(trigger()));         // new reinforcement event
+    QObject::connect(ui->calculateButton, SIGNAL(clicked()), ui->actionCalculate, SLOT(trigger()));         // calculate event
     QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->drawLineButton, SLOT(setEnabled(bool)));    //enable/disable drawLine Button
     QObject::connect(myScene, SIGNAL(signalSceneCleared(bool)), ui->drawLineButton, SLOT(setEnabled(bool)));
     QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->drawRectButton, SLOT(setEnabled(bool)));    //enable/disable drawRectangle Button
@@ -39,36 +41,43 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->actiondivide, SLOT(setDisabled(bool)));
     QObject::connect(myScene, SIGNAL(signalSceneDivided(bool)), ui->divideButton, SLOT(setDisabled(bool)));     //disable divide section Button
     QObject::connect(myScene, SIGNAL(signalSceneDivided(bool)), ui->actiondivide, SLOT(setDisabled(bool)));
+    QObject::connect(myScene, SIGNAL(signalSceneCleared(bool)), ui->divideButton, SLOT(setDisabled(bool)));
+    QObject::connect(myScene, SIGNAL(signalSceneCleared(bool)), ui->actiondivide, SLOT(setDisabled(bool)));
     QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->actionLine, SLOT(setEnabled(bool)));        //enable/disable drawLine action
     QObject::connect(myScene, SIGNAL(signalSceneCleared(bool)), ui->actionLine, SLOT(setEnabled(bool)));
     QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->actionRectangle, SLOT(setEnabled(bool)));   //enable/disable drawRectangle action
     QObject::connect(myScene, SIGNAL(signalSceneCleared(bool)), ui->actionRectangle, SLOT(setEnabled(bool)));
     QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->commandTextEdit, SLOT(slotDrawMode(bool))); //send a signal of changing mode to textEdit
     QObject::connect(myScene, SIGNAL(signalCoordChanged(QPointF)), this, SLOT(slotCoordChanged(QPointF)));  //get actual coordinats from Scene
-    QObject::connect(myScene, SIGNAL(signalSectDone(bool)), ui->drawPointButton, SLOT(setEnabled(bool)));     //enable draw point Button
-    QObject::connect(myScene, SIGNAL(signalSectDone(bool)), ui->actionPoint, SLOT(setEnabled(bool)));
+    QObject::connect(myScene, SIGNAL(signalSceneDivided(bool)), ui->drawPointButton, SLOT(setEnabled(bool)));     //enable draw point Button
+    QObject::connect(myScene, SIGNAL(signalSceneDivided(bool)), ui->actionPoint, SLOT(setEnabled(bool)));
     QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->drawPointButton, SLOT(setDisabled(bool)));     //disable draw point Button
     QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->actionPoint, SLOT(setDisabled(bool)));
     QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->newRButton, SLOT(setEnabled(bool)));     //enable new reinforcement Button
     QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->actionNewReinf, SLOT(setEnabled(bool)));
+    QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->calculateButton, SLOT(setEnabled(bool)));     //enable calculate Button
+    QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->actionCalculate, SLOT(setEnabled(bool)));
     QObject::connect(ui->actionFit_to_section, SIGNAL(triggered()), this, SLOT(slotFitView()));             //try to fit view
     QObject::connect(ui->actionLine, SIGNAL(triggered()), myScene, SLOT(setDrawLine()));                    //send command drawLine to Scene
     QObject::connect(ui->actionLine, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDrawLine()));       //send command drawLine to textEdit
     QObject::connect(ui->actionRectangle, SIGNAL(triggered()), myScene, SLOT(setDrawRect()));               //send command drawRectangle to Scene
     QObject::connect(ui->actionRectangle, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDrawRect()));  //send command drawRectangle to textEdit
-    QObject::connect(ui->actionPoint, SIGNAL(triggered()), myScene, SLOT(setDrawPoint()));               //send command drawPoint to Scene
-    QObject::connect(ui->actionPoint, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDrawPoint()));  //send command drawPoint to textEdit
+    QObject::connect(ui->actionPoint, SIGNAL(triggered()), myScene, SLOT(setDrawPoint()));                  //send command drawPoint to Scene
+    QObject::connect(ui->actionPoint, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDrawPoint()));     //send command drawPoint to textEdit
     QObject::connect(ui->actiondivide, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDivide()));       //send command divide to textEdit
     QObject::connect(ui->commandTextEdit, SIGNAL(signalDivideX(uint)), myScene, SLOT(slotDivideX(uint)));   //send number of divisions on axis X to Scene
     QObject::connect(ui->commandTextEdit, SIGNAL(signalDivideY(uint)), myScene, SLOT(slotDivideY(uint)));   //send number of divisions on axis Y to Scene
     QObject::connect(ui->actionNewSection, SIGNAL(triggered()), myScene, SLOT(slotNewSection()));           //send command new section to Scene
-    QObject::connect(ui->actionNewReinf, SIGNAL(triggered()), myScene, SLOT(slotNewReinf()));           //send command new reinforcement to Scene
-    QObject::connect(myScene, SIGNAL(signalReinfCleared(bool)), ui->drawPointButton, SLOT(setEnabled(bool)));   //enable draw Point button
-    QObject::connect(myScene, SIGNAL(signalReinfCleared(bool)), ui->newRButton, SLOT(setDisabled(bool)));       //disable new reinforcement button
-    QObject::connect(myScene, SIGNAL(signalReinfCleared(bool)), ui->actionPoint, SLOT(setEnabled(bool)));   //enable draw Point action
+    QObject::connect(ui->actionNewReinf, SIGNAL(triggered()), myScene, SLOT(slotNewReinf()));               //send command new reinforcement to Scene
+    QObject::connect(ui->actionCalculate, SIGNAL(triggered()), myScene, SLOT(slotCalculate()));                     //send command calculate to Scene
+    QObject::connect(myScene, SIGNAL(signalReinfCleared(bool)), ui->drawPointButton, SLOT(setEnabled(bool)));       //enable draw Point button
+    QObject::connect(myScene, SIGNAL(signalReinfCleared(bool)), ui->newRButton, SLOT(setDisabled(bool)));           //disable new reinforcement button
+    QObject::connect(myScene, SIGNAL(signalReinfCleared(bool)), ui->actionPoint, SLOT(setEnabled(bool)));           //enable draw Point action
     QObject::connect(myScene, SIGNAL(signalReinfCleared(bool)), ui->actionNewReinf, SLOT(setDisabled(bool)));       //disable new reinforcement action
-    //QObject::connect(myScene, SIGNAL(signalGetRDiameter(int)), ui->diameterSpinBox, SLOT(setValue(int)));   //set current diameter in spinBox //не работает
-    QObject::connect(ui->diameterSpinBox, SIGNAL(valueChanged(int)), myScene, SLOT(slotSetRDiameter(int))); //get current diameter from spinBox
+    QObject::connect(myScene, SIGNAL(signalReinfCleared(bool)), ui->calculateButton, SLOT(setDisabled(bool)));       //disable calculate button
+    QObject::connect(myScene, SIGNAL(signalReinfCleared(bool)), ui->actionCalculate, SLOT(setDisabled(bool)));       //disable calculate action
+    //QObject::connect(myScene, SIGNAL(signalGetRDiameter(int)), ui->diameterSpinBox, SLOT(setValue(int)));         //set current diameter in spinBox //не работает
+    QObject::connect(ui->diameterSpinBox, SIGNAL(valueChanged(int)), myScene, SLOT(slotSetRDiameter(int)));         //get current diameter from spinBox
     QObject::connect(myScene, SIGNAL(signalPointAdded(QPointF)), ui->commandTextEdit, SLOT(slotAddPoint(QPointF))); //send added point to textEdit
     QObject::connect(this, SIGNAL(signalKeyPressed(QString)), ui->commandTextEdit, SLOT(slotAddKey(QString)));      //send command key from mainWidget to textEdit
     QObject::connect(this, SIGNAL(signalKeyPressed(QString)), myScene, SLOT(slotGetCommand(QString)));              //send command key from mainWidget to Scene

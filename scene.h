@@ -1,6 +1,7 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+#include "calculation.h"
 #include <QWidget>
 #include <QGraphicsScene>
 #include <QVector>
@@ -11,6 +12,7 @@ class Scene : public QGraphicsScene
 {
     Q_OBJECT
 
+    Calculation* myCalc;
     int idTimer;
     enum drawMode{NONE, LINE, RECT, POINT};
     drawMode m_drawMode=NONE;
@@ -19,7 +21,7 @@ class Scene : public QGraphicsScene
     QVector<QPointF> m_concretePoints;  //Points of concrete section in GraphicsScene coordinats
     QVector<QVector<QPointF>> m_dividedPoints;   //Points of divided elements in GraphicsScene coordinats
     QVector<QVector<QVector<QPointF>>> m_dividedRegions;   //Points of divided regions in GraphicsScene coordinats
-    QVector<QPair<uint,QPointF>> m_reinfCircles;    //conteiner to store diameter and point of every reinforcement bar
+    QVector<QPair<uint,QPointF>> m_reinfCircles;    //container to store diameter and point of every reinforcement bar
     QPainterPath* m_concretePath;       //Path to draw concrete section
     uint m_currDiam=10;                    //current reinforcement diameter
     QPen pen;
@@ -30,6 +32,8 @@ class Scene : public QGraphicsScene
     QList<QGraphicsRectItem*> m_divisionItems;    //List to store divided rectangles of concrete section
     QList<QGraphicsPathItem*> m_divisionPaths;    //List to store divided paths of concrete section
     QList<QGraphicsEllipseItem*> m_reinfItems;      //List to store reinforcement circles
+    QVector<QVector<double>> m_concreteArea;        //Areas of the divided elements
+    QVector<QVector<QPointF>> m_concreteCenter;     //Point in center of the divided elements
     //QGraphicsItemGroup* m_pointsGroup;
     QPointF m_basePoint;                    //Point to transform coordinats for display
     double m_recWidth;      //Actual size of concrete section
@@ -81,6 +85,7 @@ public slots:
     void slotDivideY(uint);
     void slotSetRDiameter(int);
     void slotNewReinf();
+    void slotCalculate();
 
     // QGraphicsScene interface
 protected:
