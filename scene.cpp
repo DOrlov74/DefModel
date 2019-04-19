@@ -709,6 +709,7 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
     emit signalCoordChanged(toSceneCoord(event->scenePos()));
+    emit QGraphicsScene::mouseMoveEvent(event);
 }
 
 //void Scene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)

@@ -58,6 +58,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->calculateButton, SLOT(setEnabled(bool)));     //enable calculate Button
     QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->actionCalculate, SLOT(setEnabled(bool)));
     QObject::connect(ui->actionFit_to_section, SIGNAL(triggered()), this, SLOT(slotFitView()));             //try to fit view
+    QObject::connect(ui->actionZoom_in, SIGNAL(triggered()), this, SLOT(slotZoomIn()));
+    QObject::connect(ui->actionZoom_out, SIGNAL(triggered()), this, SLOT(slotZoomOut()));
+    QObject::connect(ui->actionPan, SIGNAL(toggled(bool)), ui->graphicsView, SLOT(slotPan(bool)));
     QObject::connect(ui->actionLine, SIGNAL(triggered()), myScene, SLOT(setDrawLine()));                    //send command drawLine to Scene
     QObject::connect(ui->actionLine, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDrawLine()));       //send command drawLine to textEdit
     QObject::connect(ui->actionRectangle, SIGNAL(triggered()), myScene, SLOT(setDrawRect()));               //send command drawRectangle to Scene
@@ -125,6 +128,17 @@ void MainWindow::setSceneSize()
 void MainWindow::slotFitView()
 {
     ui->graphicsView->fitInView(myScene->sceneRect(), Qt::KeepAspectRatio);
+
+}
+
+void MainWindow::slotZoomIn()
+{
+    ui->graphicsView->scale(1.1,1.1);
+}
+
+void MainWindow::slotZoomOut()
+{
+    ui->graphicsView->scale(0.9,0.9);
 }
 
 void MainWindow::slotCoordChanged(QPointF point)

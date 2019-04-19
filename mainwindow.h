@@ -28,6 +28,8 @@ public slots:
 //    void divideToggled(bool);
 //    void newSectionToggled(bool);
     void slotFitView();
+    void slotZoomIn();
+    void slotZoomOut();
     void slotCoordChanged(QPointF);
 
 private:

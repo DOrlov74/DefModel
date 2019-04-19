@@ -584,6 +584,7 @@
     <addaction name="actionFit_to_section"/>
     <addaction name="actionZoom_in"/>
     <addaction name="actionZoom_out"/>
+    <addaction name="actionPan"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -689,6 +690,14 @@
   <action name="actionZoom_out">
    <property name="text">
     <string>Zoom out</string>
+   </property>
+  </action>
+  <action name="actionPan">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Pan</string>
    </property>
   </action>
  </widget>
