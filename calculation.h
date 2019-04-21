@@ -15,6 +15,10 @@ class Calculation : public QObject
     QVector<QPointF> m_reinfCenter;
     uint nXdivisions;    //Number of divisions for concrete section
     uint nYdivisions;
+    QPointF m_centerPoint;
+    double m_area=0;
+    double m_Jy=0;
+    double m_Jx=0;
 
 public:
     explicit Calculation(QObject *parent = nullptr);
@@ -23,6 +27,8 @@ public:
     void setConcreteArea(const QVector<QVector<double>>&);
     void setConcreteCenter(const QVector<QVector<QPointF>>&);
     void setReinfArea(const QVector<QPair<uint,QPointF>>&);
+    void setCenterPoint();
+    void setMomentsOfInertia();
 
 signals:
 

@@ -72,6 +72,7 @@ signals:
     void signalSectDone(bool);
     void signalReinfDone(bool);
     void signalReinfCleared(bool);
+    void signalFitView();
     //void signalGetRDiameter(int);
 
 public slots:
@@ -86,6 +87,7 @@ public slots:
     void slotSetRDiameter(int);
     void slotNewReinf();
     void slotCalculate();
+    void slotFitView();
 
     // QGraphicsScene interface
 protected:

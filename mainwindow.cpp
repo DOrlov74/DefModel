@@ -5,6 +5,7 @@
 #include <QKeySequence>
 #include <QDebug>
 #include <QIntValidator>
+#include <QDoubleValidator>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -16,6 +17,10 @@ MainWindow::MainWindow(QWidget *parent) :
     myScene->setSceneRect(0,0,ui->graphicsView->width(),ui->graphicsView->height());
     //qDebug()<<"scene width: "<< ui->graphicsView->width()<<"scene height: "<<ui->graphicsView->height();
     //myScene->setBasePoint(QPointF(10,myScene->height()-10));
+    QDoubleValidator* validator=new QDoubleValidator();
+    ui->NLineEdit->setValidator(validator);
+    ui->MyLineEdit->setValidator(validator);
+    ui->MxLineEdit->setValidator(validator);
     ui->actionNewSection->setDisabled(true);
     ui->actiondivide->setDisabled(true);
     ui->actionCalculate->setDisabled(true);
@@ -57,7 +62,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->actionNewReinf, SLOT(setEnabled(bool)));
     QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->calculateButton, SLOT(setEnabled(bool)));     //enable calculate Button
     QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->actionCalculate, SLOT(setEnabled(bool)));
-    QObject::connect(ui->actionFit_to_section, SIGNAL(triggered()), this, SLOT(slotFitView()));             //try to fit view
+    QObject::connect(ui->actionFit_to_section, SIGNAL(triggered()), myScene, SLOT(slotFitView()));             //send command fit view to scene
+    //QObject::connect(myScene, SIGNAL(signalFitView()), this, SLOT(slotFitView()));                          //send command fit view to graphics view
     QObject::connect(ui->actionZoom_in, SIGNAL(triggered()), this, SLOT(slotZoomIn()));
     QObject::connect(ui->actionZoom_out, SIGNAL(triggered()), this, SLOT(slotZoomOut()));
     QObject::connect(ui->actionPan, SIGNAL(toggled(bool)), ui->graphicsView, SLOT(slotPan(bool)));

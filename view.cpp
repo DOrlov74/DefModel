@@ -28,3 +28,23 @@ void view::wheelEvent(QWheelEvent *event)
         else
           scale(0.8, 0.8);
 }
+
+
+void view::mousePressEvent(QMouseEvent *event)
+{
+    if (m_panMode)
+    {
+        m_currPoint=event->screenPos();
+    }
+    emit QGraphicsView::mousePressEvent(event);
+}
+
+void view::mouseMoveEvent(QMouseEvent *event)
+{
+    if (m_panMode)
+    {
+        translate(event->screenPos().x()-m_currPoint.x(), event->screenPos().y()-m_currPoint.y());
+        m_currPoint=event->screenPos();
+    }
+    emit QGraphicsView::mouseMoveEvent(event);
+}

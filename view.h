@@ -3,11 +3,13 @@
 
 #include <QWidget>
 #include <QGraphicsView>
+#include <QPointF>
 
 class view : public QGraphicsView
 {
     Q_OBJECT
     bool m_panMode=false;
+    QPointF m_currPoint;
 
 public:
     explicit view(QWidget *parent = nullptr);
@@ -21,6 +23,8 @@ public slots:
     // QWidget interface
 protected:
     virtual void wheelEvent(QWheelEvent *event);
+    virtual void mousePressEvent(QMouseEvent *event);
+    virtual void mouseMoveEvent(QMouseEvent *event);
 };
 
 #endif // VIEW_H

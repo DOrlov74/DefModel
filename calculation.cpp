@@ -59,3 +59,33 @@ void Calculation::setReinfArea(const QVector<QPair<uint, QPointF>>& vReinf)
         qDebug()<<"Center point of reinforcement bar:"+QString::number(i+1)+" is at x:"+QString::number(m_reinfCenter[i].x())+" y:"+QString::number(m_reinfCenter[i].y());
     }
 }
+
+void Calculation::setCenterPoint()
+{
+    double dStMomentY=0;
+    double dStMomentX=0;
+    for (int i=0; i<m_concreteArea.size(); ++i)
+    {
+        for (int j=0; j<m_concreteArea[i].size(); ++j)
+        {
+            dStMomentX+=m_concreteArea[i][j]*m_concreteCenter[i][j].x();
+            dStMomentY+=m_concreteArea[i][j]*m_concreteCenter[i][j].y();
+            m_area+=m_concreteArea[i][j];
+        }
+    }
+    m_centerPoint.setX(dStMomentX/m_area);
+    m_centerPoint.setY(dStMomentY/m_area);
+    qDebug()<<"Center Point x;"+QString::number(m_centerPoint.x())+" y:"+QString::number(m_centerPoint.y());
+}
+
+void Calculation::setMomentsOfInertia()
+{
+    for (int i=0; i<m_concreteArea.size(); ++i)
+    {
+        for (int j=0; j<m_concreteArea[i].size(); ++j)
+        {
+            m_Jx+=qPow(m_concreteCenter[i][j].y()-m_centerPoint.y(),2)*m_concreteArea[i][j];
+            m_Jy+=qPow(m_concreteCenter[i][j].x()-m_centerPoint.x(),2)*m_concreteArea[i][j];
+        }
+    }
+}

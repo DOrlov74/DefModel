@@ -127,6 +127,14 @@ void Scene::slotCalculate()
     myCalc->setConcreteArea(m_concreteArea);
     myCalc->setConcreteCenter(m_concreteCenter);
     myCalc->setReinfArea(m_reinfCircles);
+    myCalc->setCenterPoint();
+    myCalc->setMomentsOfInertia();
+}
+
+void Scene::slotFitView()
+{
+    this->setSceneRect(lowX-m_viewMargin,lowY-m_viewMargin,m_recWidth+m_viewMargin, m_recHeight+m_viewMargin);
+    //emit signalFitView();
 }
 
 void Scene::setDrawLine()
