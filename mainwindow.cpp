@@ -34,6 +34,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->drawPointButton, SIGNAL(clicked()), ui->actionPoint, SLOT(trigger()));         // draw point event
     QObject::connect(ui->newRButton, SIGNAL(clicked()), ui->actionNewReinf, SLOT(trigger()));         // new reinforcement event
     QObject::connect(ui->calculateButton, SIGNAL(clicked()), ui->actionCalculate, SLOT(trigger()));         // calculate event
+    QObject::connect(ui->NLineEdit, SIGNAL(textChanged(QString)), myScene, SLOT(slotSetN(QString)));        //send N value to Scene
+    QObject::connect(ui->MxLineEdit, SIGNAL(textChanged(QString)), myScene, SLOT(slotSetMx(QString)));      //send Mx value to Scene
+    QObject::connect(ui->MyLineEdit, SIGNAL(textChanged(QString)), myScene, SLOT(slotSetMy(QString)));      //send My value to Scene
     QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->drawLineButton, SLOT(setEnabled(bool)));    //enable/disable drawLine Button
     QObject::connect(myScene, SIGNAL(signalSceneCleared(bool)), ui->drawLineButton, SLOT(setEnabled(bool)));
     QObject::connect(myScene, SIGNAL(signalDrawMode(bool)), ui->drawRectButton, SLOT(setEnabled(bool)));    //enable/disable drawRectangle Button
@@ -60,8 +63,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->actionPoint, SLOT(setDisabled(bool)));
     QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->newRButton, SLOT(setEnabled(bool)));     //enable new reinforcement Button
     QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->actionNewReinf, SLOT(setEnabled(bool)));
-    QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->calculateButton, SLOT(setEnabled(bool)));     //enable calculate Button
-    QObject::connect(myScene, SIGNAL(signalReinfDone(bool)), ui->actionCalculate, SLOT(setEnabled(bool)));
+    QObject::connect(myScene, SIGNAL(signalForcesDone(bool)), ui->calculateButton, SLOT(setEnabled(bool)));     //enable calculate Button
+    QObject::connect(myScene, SIGNAL(signalForcesDone(bool)), ui->actionCalculate, SLOT(setEnabled(bool)));
     QObject::connect(ui->actionFit_to_section, SIGNAL(triggered()), myScene, SLOT(slotFitView()));             //send command fit view to scene
     //QObject::connect(myScene, SIGNAL(signalFitView()), this, SLOT(slotFitView()));                          //send command fit view to graphics view
     QObject::connect(ui->actionZoom_in, SIGNAL(triggered()), this, SLOT(slotZoomIn()));

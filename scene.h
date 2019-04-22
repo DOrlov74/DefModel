@@ -47,6 +47,9 @@ class Scene : public QGraphicsScene
     uint m_viewMargin=20;
     bool m_isRect;
     bool m_leftToRight;
+    bool m_NIsSet=false;
+    bool m_MxIsSet=false;
+    bool m_MyIsSet=false;
 
     QPointF toSceneCoord(const QPointF&);   //Transform coordinats methods
     QPointF fromSceneCoord(const QPointF&);
@@ -55,6 +58,7 @@ class Scene : public QGraphicsScene
     void drawDivisions();
     bool isBetween(QPointF, QPointF, QPointF);
     void Divide();
+    void checkForces();
 
 public:
     explicit Scene(QWidget *parent = nullptr);
@@ -73,6 +77,7 @@ signals:
     void signalReinfDone(bool);
     void signalReinfCleared(bool);
     void signalFitView();
+    void signalForcesDone(bool);
     //void signalGetRDiameter(int);
 
 public slots:
@@ -88,6 +93,9 @@ public slots:
     void slotNewReinf();
     void slotCalculate();
     void slotFitView();
+    void slotSetN(QString);
+    void slotSetMx(QString);
+    void slotSetMy(QString);
 
     // QGraphicsScene interface
 protected:

@@ -19,6 +19,9 @@ class Calculation : public QObject
     double m_area=0;
     double m_Jy=0;
     double m_Jx=0;
+    double m_N=0;
+    double m_Mx=0;
+    double m_My=0;
 
 public:
     explicit Calculation(QObject *parent = nullptr);
@@ -29,6 +32,9 @@ public:
     void setReinfArea(const QVector<QPair<uint,QPointF>>&);
     void setCenterPoint();
     void setMomentsOfInertia();
+    void setN(double);
+    void setMx(double);
+    void setMy(double);
 
 signals:
 

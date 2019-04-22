@@ -137,6 +137,60 @@ void Scene::slotFitView()
     //emit signalFitView();
 }
 
+void Scene::slotSetN(QString str)
+{
+    QRegularExpression reg("[+-]?([0-9]*[.|,])?[0-9]+");
+    QRegularExpressionMatchIterator it=reg.globalMatch(str);
+    if (it.hasNext())
+    {
+        QRegularExpressionMatch match=it.next();
+        qDebug()<<"filtered N="<<match.captured(0);
+        myCalc->setN(QString(match.captured(0)).toDouble());
+        m_NIsSet=true;
+        checkForces();
+    }
+    else {
+        m_NIsSet=false;
+    }
+    qDebug()<<"NIsSet="<<m_NIsSet;
+}
+
+void Scene::slotSetMx(QString str)
+{
+    QRegularExpression reg("[+-]?([0-9]*[.|,])?[0-9]+");
+    QRegularExpressionMatchIterator it=reg.globalMatch(str);
+    if (it.hasNext())
+    {
+        QRegularExpressionMatch match=it.next();
+        qDebug()<<"filtered Mx="<<match.captured(0);
+        myCalc->setMx(QString(match.captured(0)).toDouble());
+        m_MxIsSet=true;
+        checkForces();
+    }
+    else {
+        m_MxIsSet=false;
+    }
+    qDebug()<<"MxIsSet="<<m_MxIsSet;
+}
+
+void Scene::slotSetMy(QString str)
+{
+    QRegularExpression reg("[+-]?([0-9]*[.|,])?[0-9]+");
+    QRegularExpressionMatchIterator it=reg.globalMatch(str);
+    if (it.hasNext())
+    {
+        QRegularExpressionMatch match=it.next();
+        qDebug()<<"filtered My="<<match.captured(0);
+        myCalc->setMy(QString(match.captured(0)).toDouble());
+        m_MyIsSet=true;
+        checkForces();
+    }
+    else {
+        m_MyIsSet=false;
+    }
+    qDebug()<<"MyIsSet="<<m_MyIsSet;
+}
+
 void Scene::setDrawLine()
 {
     m_drawMode=LINE;
@@ -509,6 +563,12 @@ void Scene::Divide()
         }
     }
     drawDivisions();
+}
+
+void Scene::checkForces()
+{
+    if(m_NIsSet&&m_MxIsSet&&m_MyIsSet)
+    {emit signalForcesDone(true);}
 }
 
 void Scene::slotNewSection()

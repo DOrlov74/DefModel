@@ -89,3 +89,18 @@ void Calculation::setMomentsOfInertia()
         }
     }
 }
+
+void Calculation::setN(double d)
+{
+    m_N=d;
+}
+
+void Calculation::setMx(double d)
+{
+    m_Mx=d;
+}
+
+void Calculation::setMy(double d)
+{
+    m_My=d;
+}
