@@ -21,6 +21,7 @@ class Scene : public QGraphicsScene
     QVector<QPointF> m_concretePoints;  //Points of concrete section in GraphicsScene coordinats
     QVector<QVector<QPointF>> m_dividedPoints;   //Points of divided elements in GraphicsScene coordinats
     QVector<QVector<QVector<QPointF>>> m_dividedRegions;   //Points of divided regions in GraphicsScene coordinats
+    QVector<QVector<QVector<QVector<int>>>> m_dividedFaces;          //Numbers of points for every face of divided rectangular
     QVector<QPair<uint,QPointF>> m_reinfCircles;    //container to store diameter and point of every reinforcement bar
     QPainterPath* m_concretePath;       //Path to draw concrete section
     uint m_currDiam=10;                    //current reinforcement diameter
@@ -33,6 +34,8 @@ class Scene : public QGraphicsScene
     QList<QGraphicsPathItem*> m_divisionPaths;    //List to store divided paths of concrete section
     QList<QGraphicsEllipseItem*> m_reinfItems;      //List to store reinforcement circles
     QVector<QVector<double>> m_concreteArea;        //Areas of the divided elements
+    QVector<QVector<double>> m_concreteJx;          //Moments of inertia about X axis of the divided elements
+    QVector<QVector<double>> m_concreteJy;          //Moments of inertia about Y axis of the divided elements
     QVector<QVector<QPointF>> m_concreteCenter;     //Point in center of the divided elements
     //QGraphicsItemGroup* m_pointsGroup;
     QPointF m_basePoint;                    //Point to transform coordinats for display

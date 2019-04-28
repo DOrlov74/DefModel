@@ -88,6 +88,7 @@ void Calculation::setMomentsOfInertia()
             m_Jy+=qPow(m_concreteCenter[i][j].x()-m_centerPoint.x(),2)*m_concreteArea[i][j];
         }
     }
+    qDebug()<<"Jx="+QString::number(m_Jx)+" Jy="+QString::number(m_Jy);
 }
 
 void Calculation::setN(double d)
