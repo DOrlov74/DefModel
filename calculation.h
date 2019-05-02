@@ -31,7 +31,7 @@ public:
     void setConcreteCenter(const QVector<QVector<QPointF>>&);
     void setReinfArea(const QVector<QPair<uint,QPointF>>&);
     void setCenterPoint();
-    void setMomentsOfInertia();
+    void setMomentsOfInertia(const QVector<QVector<double>>&, const QVector<QVector<double>>&);
     void setN(double);
     void setMx(double);
     void setMy(double);

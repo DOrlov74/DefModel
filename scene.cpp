@@ -213,7 +213,7 @@ void Scene::slotCalculate()
                         for (int f=0; f<4;++f)
                         {
                             if (freeFaces[f])
-                            {++f;}
+                            {++nFreeFaces;}
                         }
                         if (nFreeFaces==0)         //rectange fill all figure
                         {
@@ -545,6 +545,349 @@ void Scene::slotCalculate()
                             m_concreteJy[i][j]=Jy1+Jy2+Jy3;
                             JxIsSet=true;
                         }
+                        else //if (nFreeFaces==3)     //three faces are free
+                        {
+                            QPointF p1, p2;                             //points of quadrangle for divide it
+                            bool p1IsFound=false;
+                            for (int f=0; f<4; ++f)             //iterate through divided rectangle faces
+                            {
+                                if (!freeFaces[f])
+                                {
+                                    for (int k=0; k<iSize; ++k)             //iterate through polygon points
+                                    {
+                                        int p=0;
+                                        while (p<m_dividedFaces[i][j][f].size()&&m_dividedFaces[i][j][f][p]==(k+1))
+                                        {
+                                            ++p;
+                                        }
+                                        if (p<m_dividedFaces[i][j][f].size())
+                                        {
+                                            if (!p1IsFound)
+                                            {
+                                                p1=m_dividedRegions[i][j][k];
+                                                qDebug()<<"Point one for divide quadrangle is found";
+                                                p1IsFound=true;
+                                            }
+                                            else
+                                            {
+                                                p2=m_dividedRegions[i][j][k];
+                                                qDebug()<<"Point two for divide quadrangle is found";
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            double h1, w1, h2, w2, h3, w3;                  //height and width of triangles
+                            double yc1, yc2, yc3, yc4, xc1, xc2, xc3, xc4;    //distances from figure center to divided elements
+                            double Jx1, Jx2, Jx3, Jx4, Jy1, Jy2, Jy3, Jy4;    //moments of inertia of divided elements
+                            if (!freeFaces[0])         //face with connection to figure is with Xmin
+                            {
+                                if (p1.y()>p2.y())
+                                {
+                                    switchPoint(p1, p2);
+                                }
+                                h1=p2.y()-p1.y();             //height of the first triange between two points
+                                w2=p1.x()-dXmin;             //width of the second triangle connected to face with Xmin
+                                w3=p2.x()-dXmin;             //width of the third triangle connected to face with Xmin
+                                yc1=p2.y()-m_concreteCenter[i][j].y()-h1/3;       //distance along Y axis from the first triangle center to the section center
+                                xc2=m_concreteCenter[i][j].x()-dXmin-w2/3;       //distance along X axis from the second triangle center to the section center
+                                xc3=m_concreteCenter[i][j].x()-dXmin-w3/3;       //distance along X axis from the third triangle center to the section center
+                                yc4=p2.y()-m_concreteCenter[i][j].y()-h1/2;       //distance along Y axis from the rectangle center to the section center
+                                xc4=p1.x()-m_concreteCenter[i][j].x()-w2/2;       //distance along X axis from the rectangle center to the section center
+                                Jx4=w2*qPow(h1,3)/12+w2*h1*qPow(yc4,2);          //moment of inertia about X axis of the rectangle
+                                Jy4=qPow(w2,3)*h1/12+w2*h1*qPow(xc4,2);          //moment of inertia about Y axis of the rectangle
+                                QPointF pYmin, pYmax;
+                                if (p1.x()<dXmax)                   //point is not on Xmax
+                                {
+                                    w1=dXmax-p1.x();                //width of triangle between two points
+                                    xc1=p1.x()-m_concreteCenter[i][j].x()+w1/3;         //distance along X axis from the first triangle center to the section center
+                                    Jx1=w1*qPow(h1,3)/36+w1*h1/2*qPow(yc1,2);           //moment of inertia about X axis of the first triangle
+                                    Jy1=qPow(w1,3)*h1/36+w1*h1/2*qPow(xc1,2);           //moment of inertia about Y axis of the first triangle
+                                }
+                                else                                //point is on Xmax
+                                {
+                                    w1=dXmax-p2.x();            //width of triangle between two points
+                                    xc1=p1.x()-m_concreteCenter[i][j].x()-w1/3;         //distance along X axis from the first triangle center to the section center
+                                    Jx1=-w1*qPow(h1,3)/36-w1*h1/2*qPow(yc1,2);           //moment of inertia about X axis of the first triangle
+                                    Jy1=-qPow(w1,3)*h1/36-w1*h1/2*qPow(xc1,2);           //moment of inertia about Y axis of the first triangle
+                                }
+                                if (p1.y()>dYmin)                   //point is not on Ymin
+                                {
+                                    h2=p1.y()-dYmin;                //height of the second triangle connected to face with Xmin
+                                    yc2=m_concreteCenter[i][j].y()-p1.y()+h2/3;         //distance along Y axis from the second triangle center to the section center
+                                    Jx2=w2*qPow(h2,3)/36+w2*h2/2*qPow(yc2,2);           //moment of inertia about X axis of the second triangle
+                                    Jy2=qPow(w2,3)*h2/36+w2*h2/2*qPow(xc2,2);           //moment of inertia about Y axis of the second triangle
+                                }
+                                else                                //point is on Ymin
+                                {
+                                    pYmin=m_dividedRegions[i][j][m_dividedFaces[i][j][0][0]-1];
+                                    for (int p=1; p<m_dividedFaces[i][j][0].size(); ++p)
+                                    {
+                                        if(m_dividedRegions[i][j][m_dividedFaces[i][j][0][p]-1].y()<m_dividedRegions[i][j][m_dividedFaces[i][j][0][p-1]-1].y())
+                                        {
+                                            pYmin=m_dividedRegions[i][j][m_dividedFaces[i][j][0][p]-1];
+                                        }
+                                    }
+                                    h2=pYmin.y()-p1.y();            //height of the second triangle connected to face with Xmin
+                                    yc2=m_concreteCenter[i][j].y()-p1.y()-h2/3;         //distance along Y axis from the second triangle center to the section center
+                                    Jx2=-w2*qPow(h2,3)/36-w2*h2/2*qPow(yc2,2);           //moment of inertia about X axis of the second triangle
+                                    Jy2=-qPow(w2,3)*h2/36-w2*h2/2*qPow(xc2,2);           //moment of inertia about Y axis of the second triangle
+                                }
+                                if (p2.y()<dYmax)                   //point is not on Ymax
+                                {
+                                    h3=dYmax-p2.y();                //height of the third triangle connected to face with Xmin
+                                    yc3=p2.y()-m_concreteCenter[i][j].y()+h3/3;         //distance along Y axis from the third triangle center to the section center
+                                    Jx3=w3*qPow(h3,3)/36+w3*h3/2*qPow(yc3,2);           //moment of inertia about X axis of the third triangle
+                                    Jy3=qPow(w3,3)*h3/36+w3*h3/2*qPow(xc3,2);           //moment of inertia about Y axis of the third triangle
+                                }
+                                else                                //point is on Ymax
+                                {
+                                    pYmax=m_dividedRegions[i][j][m_dividedFaces[i][j][0][0]-1];
+                                    for (int p=1; p<m_dividedFaces[i][j][0].size(); ++p)
+                                    {
+                                        if(m_dividedRegions[i][j][m_dividedFaces[i][j][0][p]-1].y()>m_dividedRegions[i][j][m_dividedFaces[i][j][0][p-1]-1].y())
+                                        {
+                                            pYmax=m_dividedRegions[i][j][m_dividedFaces[i][j][0][p]-1];
+                                        }
+                                    }
+                                    h3=dYmax-pYmin.y();            //height of the third triangle connected to face with Xmin
+                                    yc3=p2.y()-m_concreteCenter[i][j].y()-h3/3;         //distance along Y axis from the third triangle center to the section center
+                                    Jx3=-w3*qPow(h3,3)/36-w3*h3/2*qPow(yc3,2);           //moment of inertia about X axis of the third triangle
+                                    Jy3=-qPow(w3,3)*h3/36-w3*h3/2*qPow(xc3,2);           //moment of inertia about Y axis of the third triangle
+                                }
+                            }
+                            else if (!freeFaces[1])         //face with connection to figure is with Ymin
+                            {
+                                if (p1.x()>p2.x())
+                                {
+                                    switchPoint(p1, p2);
+                                }
+                                w1=p2.x()-p1.x();             //width of triange between two points
+                                h2=p1.y()-dYmin;             //height of the second triangle connected to face with Ymin
+                                h3=p2.y()-dYmin;             //height of the third triangle connected to face with Ymin
+                                xc1=p2.x()-m_concreteCenter[i][j].x()-w1/3;       //distance along X axis from the first triangle center to the section center
+                                yc2=m_concreteCenter[i][j].y()-dYmin-h2/3;       //distance along Y axis from the second triangle center to the section center
+                                yc3=m_concreteCenter[i][j].y()-dYmin-h3/3;       //distance along Y axis from the third triangle center to the section center
+                                xc4=p2.x()-m_concreteCenter[i][j].x()-w1/2;       //distance along X axis from the rectangle center to the section center
+                                yc4=p1.y()-m_concreteCenter[i][j].y()-h2/2;       //distance along Y axis from the rectangle center to the section center
+                                Jy4=h2*qPow(w1,3)/12+h2*w1*qPow(xc4,2);          //moment of inertia about Y axis of the rectangle
+                                Jx4=qPow(h2,3)*w1/12+h2*w1*qPow(yc4,2);          //moment of inertia about X axis of the rectangle
+                                QPointF pXmin, pXmax;
+                                if (p1.y()<dYmax)                   //point is not on Ymax
+                                {
+                                    h1=dYmax-p1.y();                //height of triangle between two points
+                                    yc1=p1.y()-m_concreteCenter[i][j].y()+h1/3;         //distance along Y axis from the first triangle center to the section center
+                                    Jx1=w1*qPow(h1,3)/36+w1*h1/2*qPow(yc1,2);           //moment of inertia about X axis of the first triangle
+                                    Jy1=qPow(w1,3)*h1/36+w1*h1/2*qPow(xc1,2);           //moment of inertia about Y axis of the first triangle
+                                }
+                                else                                //point is on Ymax
+                                {
+                                    h1=dYmax-p2.y();            //height of triangle between two points
+                                    yc1=p1.y()-m_concreteCenter[i][j].y()-h1/3;         //distance along Y axis from the first triangle center to the section center
+                                    Jx1=-w1*qPow(h1,3)/36-w1*h1/2*qPow(yc1,2);           //moment of inertia about X axis of the first triangle
+                                    Jy1=-qPow(w1,3)*h1/36-w1*h1/2*qPow(xc1,2);           //moment of inertia about Y axis of the first triangle
+                                }
+                                if (p1.x()>dXmin)                   //point is not on Xmin
+                                {
+                                    w2=p1.x()-dXmin;                //width of the second triangle connected to face with Ymin
+                                    xc2=m_concreteCenter[i][j].x()-p1.x()+w2/3;         //distance along X axis from the second triangle center to the section center
+                                    Jx2=w2*qPow(h2,3)/36+w2*h2/2*qPow(yc2,2);           //moment of inertia about X axis of the second triangle
+                                    Jy2=qPow(w2,3)*h2/36+w2*h2/2*qPow(xc2,2);           //moment of inertia about Y axis of the second triangle
+                                }
+                                else                                //point is on Xmin
+                                {
+                                    pXmin=m_dividedRegions[i][j][m_dividedFaces[i][j][1][0]-1];
+                                    for (int p=1; p<m_dividedFaces[i][j][1].size(); ++p)
+                                    {
+                                        if(m_dividedRegions[i][j][m_dividedFaces[i][j][1][p]-1].x()<m_dividedRegions[i][j][m_dividedFaces[i][j][1][p-1]-1].x())
+                                        {
+                                            pXmin=m_dividedRegions[i][j][m_dividedFaces[i][j][1][p]-1];
+                                        }
+                                    }
+                                    w2=pXmin.x()-p1.x();            //width of the second triangle connected to face with Ymin
+                                    xc2=m_concreteCenter[i][j].x()-p1.x()-w2/3;         //distance along X axis from the second triangle center to the section center
+                                    Jx2=-w2*qPow(h2,3)/36-w2*h2/2*qPow(yc2,2);           //moment of inertia about X axis of the second triangle
+                                    Jy2=-qPow(w2,3)*h2/36-w2*h2/2*qPow(xc2,2);           //moment of inertia about Y axis of the second triangle
+                                }
+                                if (p2.x()<dXmax)                   //point is not on Xmax
+                                {
+                                    w3=dXmax-p2.x();                //width of the third triangle connected to face with Ymin
+                                    xc3=p2.x()-m_concreteCenter[i][j].x()+w3/3;         //distance along X axis from the third triangle center to the section center
+                                    Jx3=w3*qPow(h3,3)/36+w3*h3/2*qPow(yc3,2);           //moment of inertia about X axis of the third triangle
+                                    Jy3=qPow(w3,3)*h3/36+w3*h3/2*qPow(xc3,2);           //moment of inertia about Y axis of the third triangle
+                                }
+                                else                                //point is on Xmax
+                                {
+                                    pXmax=m_dividedRegions[i][j][m_dividedFaces[i][j][1][0]-1];
+                                    for (int p=1; p<m_dividedFaces[i][j][1].size(); ++p)
+                                    {
+                                        if(m_dividedRegions[i][j][m_dividedFaces[i][j][1][p]-1].x()>m_dividedRegions[i][j][m_dividedFaces[i][j][1][p-1]-1].x())
+                                        {
+                                            pXmax=m_dividedRegions[i][j][m_dividedFaces[i][j][1][p]-1];
+                                        }
+                                    }
+                                    w3=dXmax-pXmin.x();            //width of the third triangle connected to face with Ymin
+                                    xc3=p2.x()-m_concreteCenter[i][j].x()-w3/3;         //distance along X axis from the third triangle center to the section center
+                                    Jx3=-w3*qPow(h3,3)/36-w3*h3/2*qPow(yc3,2);           //moment of inertia about X axis of the third triangle
+                                    Jy3=-qPow(w3,3)*h3/36-w3*h3/2*qPow(xc3,2);           //moment of inertia about Y axis of the third triangle
+                                }
+                            }
+                            else if (!freeFaces[2])         //face with connection to figure is with Xmax
+                            {
+                                if (p1.y()>p2.y())
+                                {
+                                    switchPoint(p1, p2);
+                                }
+                                h1=p2.y()-p1.y();             //height of the first triange between two points
+                                w2=dXmax-p1.x();             //width of the second triangle connected to face with Xmax
+                                w3=dXmax-p2.x();             //width of the third triangle connected to face with Xmax
+                                yc1=p2.y()-m_concreteCenter[i][j].y()-h1/3;       //distance along Y axis from the first triangle center to the section center
+                                xc2=dXmax-m_concreteCenter[i][j].x()-w2/3;       //distance along X axis from the second triangle center to the section center
+                                xc3=dXmax-m_concreteCenter[i][j].x()-w3/3;       //distance along X axis from the third triangle center to the section center
+                                yc4=p2.y()-m_concreteCenter[i][j].y()-h1/2;       //distance along Y axis from the rectangle center to the section center
+                                xc4=dXmax-m_concreteCenter[i][j].x()-w2/2;       //distance along X axis from the rectangle center to the section center
+                                Jx4=w2*qPow(h1,3)/12+w2*h1*qPow(yc4,2);          //moment of inertia about X axis of the rectangle
+                                Jy4=qPow(w2,3)*h1/12+w2*h1*qPow(xc4,2);          //moment of inertia about Y axis of the rectangle
+                                QPointF pYmin, pYmax;
+                                if (p1.x()>dXmin)                   //point is not on Xmin
+                                {
+                                    w1=p1.x()-dXmin;                //width of triangle between two points
+                                    xc1=m_concreteCenter[i][j].x()-p1.x()+w1/3;         //distance along X axis from the first triangle center to the section center
+                                    Jx1=w1*qPow(h1,3)/36+w1*h1/2*qPow(yc1,2);           //moment of inertia about X axis of the first triangle
+                                    Jy1=qPow(w1,3)*h1/36+w1*h1/2*qPow(xc1,2);           //moment of inertia about Y axis of the first triangle
+                                }
+                                else                                //point is on Xmin
+                                {
+                                    w1=p2.x()-dXmin;            //width of triangle between two points
+                                    xc1=m_concreteCenter[i][j].x()-p1.x()-w1/3;         //distance along X axis from the first triangle center to the section center
+                                    Jx1=-w1*qPow(h1,3)/36-w1*h1/2*qPow(yc1,2);           //moment of inertia about X axis of the first triangle
+                                    Jy1=-qPow(w1,3)*h1/36-w1*h1/2*qPow(xc1,2);           //moment of inertia about Y axis of the first triangle
+                                }
+                                if (p1.y()>dYmin)                   //point is not on Ymin
+                                {
+                                    h2=p1.y()-dYmin;                //height of the second triangle connected to face with Xmax
+                                    yc2=m_concreteCenter[i][j].y()-p1.y()+h2/3;         //distance along Y axis from the second triangle center to the section center
+                                    Jx2=w2*qPow(h2,3)/36+w2*h2/2*qPow(yc2,2);           //moment of inertia about X axis of the second triangle
+                                    Jy2=qPow(w2,3)*h2/36+w2*h2/2*qPow(xc2,2);           //moment of inertia about Y axis of the second triangle
+                                }
+                                else                                //point is on Ymin
+                                {
+                                    pYmin=m_dividedRegions[i][j][m_dividedFaces[i][j][2][0]-1];
+                                    for (int p=1; p<m_dividedFaces[i][j][2].size(); ++p)
+                                    {
+                                        if(m_dividedRegions[i][j][m_dividedFaces[i][j][2][p]-1].y()<m_dividedRegions[i][j][m_dividedFaces[i][j][2][p-1]-1].y())
+                                        {
+                                            pYmin=m_dividedRegions[i][j][m_dividedFaces[i][j][2][p]-1];
+                                        }
+                                    }
+                                    h2=pYmin.y()-p1.y();            //height of the second triangle connected to face with Xmax
+                                    yc2=m_concreteCenter[i][j].y()-p1.y()-h2/3;         //distance along Y axis from the second triangle center to the section center
+                                    Jx2=-w2*qPow(h2,3)/36-w2*h2/2*qPow(yc2,2);           //moment of inertia about X axis of the second triangle
+                                    Jy2=-qPow(w2,3)*h2/36-w2*h2/2*qPow(xc2,2);           //moment of inertia about Y axis of the second triangle
+                                }
+                                if (p2.y()<dYmax)                   //point is not on Ymax
+                                {
+                                    h3=dYmax-p2.y();                //height of the third triangle connected to face with Xmax
+                                    yc3=p2.y()-m_concreteCenter[i][j].y()+h3/3;         //distance along Y axis from the third triangle center to the section center
+                                    Jx3=w3*qPow(h3,3)/36+w3*h3/2*qPow(yc3,2);           //moment of inertia about X axis of the third triangle
+                                    Jy3=qPow(w3,3)*h3/36+w3*h3/2*qPow(xc3,2);           //moment of inertia about Y axis of the third triangle
+                                }
+                                else                                //point is on Ymax
+                                {
+                                    pYmax=m_dividedRegions[i][j][m_dividedFaces[i][j][2][0]-1];
+                                    for (int p=1; p<m_dividedFaces[i][j][2].size(); ++p)
+                                    {
+                                        if(m_dividedRegions[i][j][m_dividedFaces[i][j][2][p]-1].y()>m_dividedRegions[i][j][m_dividedFaces[i][j][2][p-1]-1].y())
+                                        {
+                                            pYmax=m_dividedRegions[i][j][m_dividedFaces[i][j][2][p]-1];
+                                        }
+                                    }
+                                    h3=dYmax-pYmin.y();            //height of the third triangle connected to face with Xmax
+                                    yc3=p2.y()-m_concreteCenter[i][j].y()-h3/3;         //distance along Y axis from the third triangle center to the section center
+                                    Jx3=-w3*qPow(h3,3)/36-w3*h3/2*qPow(yc3,2);           //moment of inertia about X axis of the third triangle
+                                    Jy3=-qPow(w3,3)*h3/36-w3*h3/2*qPow(xc3,2);           //moment of inertia about Y axis of the third triangle
+                                }
+                            }
+                            else //if (!freeFaces[3])         //face with connection to figure is with Ymax
+                            {
+                                if (p1.x()>p2.x())
+                                {
+                                    switchPoint(p1, p2);
+                                }
+                                w1=p2.x()-p1.x();             //width of triange between two points
+                                h2=dYmax-p1.y();             //height of the second triangle connected to face with Ymax
+                                h3=dYmax-p2.y();             //height of the third triangle connected to face with Ymax
+                                xc1=p2.x()-m_concreteCenter[i][j].x()-w1/3;       //distance along X axis from the first triangle center to the section center
+                                yc2=dYmax-m_concreteCenter[i][j].y()-h2/3;       //distance along Y axis from the second triangle center to the section center
+                                yc3=dYmax-m_concreteCenter[i][j].y()-h3/3;       //distance along Y axis from the third triangle center to the section center
+                                xc4=p2.x()-m_concreteCenter[i][j].x()-w1/2;       //distance along X axis from the rectangle center to the section center
+                                yc4=dYmax-m_concreteCenter[i][j].y()-h2/2;       //distance along Y axis from the rectangle center to the section center
+                                Jy4=h2*qPow(w1,3)/12+h2*w1*qPow(xc4,2);          //moment of inertia about Y axis of the rectangle
+                                Jx4=qPow(h2,3)*w1/12+h2*w1*qPow(yc4,2);          //moment of inertia about X axis of the rectangle
+                                QPointF pXmin, pXmax;
+                                if (p1.y()>dYmin)                   //point is not on Ymin
+                                {
+                                    h1=p1.y()-dYmin;                //height of triangle between two points
+                                    yc1=m_concreteCenter[i][j].y()-p1.y()+h1/3;         //distance along Y axis from the first triangle center to the section center
+                                    Jx1=w1*qPow(h1,3)/36+w1*h1/2*qPow(yc1,2);           //moment of inertia about X axis of the first triangle
+                                    Jy1=qPow(w1,3)*h1/36+w1*h1/2*qPow(xc1,2);           //moment of inertia about Y axis of the first triangle
+                                }
+                                else                                //point is on Ymin
+                                {
+                                    h1=p2.y()-dYmin;            //height of triangle between two points
+                                    yc1=m_concreteCenter[i][j].y()-p1.y()-h1/3;         //distance along Y axis from the first triangle center to the section center
+                                    Jx1=-w1*qPow(h1,3)/36-w1*h1/2*qPow(yc1,2);           //moment of inertia about X axis of the first triangle
+                                    Jy1=-qPow(w1,3)*h1/36-w1*h1/2*qPow(xc1,2);           //moment of inertia about Y axis of the first triangle
+                                }
+                                if (p1.x()>dXmin)                   //point is not on Xmin
+                                {
+                                    w2=p1.x()-dXmin;                //width of the second triangle connected to face with Ymax
+                                    xc2=m_concreteCenter[i][j].x()-p1.x()+w2/3;         //distance along X axis from the second triangle center to the section center
+                                    Jx2=w2*qPow(h2,3)/36+w2*h2/2*qPow(yc2,2);           //moment of inertia about X axis of the second triangle
+                                    Jy2=qPow(w2,3)*h2/36+w2*h2/2*qPow(xc2,2);           //moment of inertia about Y axis of the second triangle
+                                }
+                                else                                //point is on Xmin
+                                {
+                                    pXmin=m_dividedRegions[i][j][m_dividedFaces[i][j][3][0]-1];
+                                    for (int p=1; p<m_dividedFaces[i][j][3].size(); ++p)
+                                    {
+                                        if(m_dividedRegions[i][j][m_dividedFaces[i][j][3][p]-1].x()<m_dividedRegions[i][j][m_dividedFaces[i][j][3][p-1]-1].x())
+                                        {
+                                            pXmin=m_dividedRegions[i][j][m_dividedFaces[i][j][3][p]-1];
+                                        }
+                                    }
+                                    w2=pXmin.x()-p1.x();            //width of the second triangle connected to face with Ymax
+                                    xc2=m_concreteCenter[i][j].x()-p1.x()-w2/3;         //distance along X axis from the second triangle center to the section center
+                                    Jx2=-w2*qPow(h2,3)/36-w2*h2/2*qPow(yc2,2);           //moment of inertia about X axis of the second triangle
+                                    Jy2=-qPow(w2,3)*h2/36-w2*h2/2*qPow(xc2,2);           //moment of inertia about Y axis of the second triangle
+                                }
+                                if (p2.x()<dXmax)                   //point is not on Xmax
+                                {
+                                    w3=dXmax-p2.x();                //width of the third triangle connected to face with Ymax
+                                    xc3=p2.x()-m_concreteCenter[i][j].x()+w3/3;         //distance along X axis from the third triangle center to the section center
+                                    Jx3=w3*qPow(h3,3)/36+w3*h3/2*qPow(yc3,2);           //moment of inertia about X axis of the third triangle
+                                    Jy3=qPow(w3,3)*h3/36+w3*h3/2*qPow(xc3,2);           //moment of inertia about Y axis of the third triangle
+                                }
+                                else                                //point is on Xmax
+                                {
+                                    pXmax=m_dividedRegions[i][j][m_dividedFaces[i][j][3][0]-1];
+                                    for (int p=1; p<m_dividedFaces[i][j][3].size(); ++p)
+                                    {
+                                        if(m_dividedRegions[i][j][m_dividedFaces[i][j][3][p]-1].x()>m_dividedRegions[i][j][m_dividedFaces[i][j][3][p-1]-1].x())
+                                        {
+                                            pXmax=m_dividedRegions[i][j][m_dividedFaces[i][j][3][p]-1];
+                                        }
+                                    }
+                                    w3=dXmax-pXmin.x();            //width of the third triangle connected to face with Ymax
+                                    xc3=p2.x()-m_concreteCenter[i][j].x()-w3/3;         //distance along X axis from the third triangle center to the section center
+                                    Jx3=-w3*qPow(h3,3)/36-w3*h3/2*qPow(yc3,2);           //moment of inertia about X axis of the third triangle
+                                    Jy3=-qPow(w3,3)*h3/36-w3*h3/2*qPow(xc3,2);           //moment of inertia about Y axis of the third triangle
+                                }
+                            }
+                            m_concreteJx[i][j]=Jx1+Jx2+Jx3+Jx4;
+                            m_concreteJy[i][j]=Jy1+Jy2+Jy3+Jy4;
+                            JxIsSet=true;
+                        }
                         break;
                     }
                 }
@@ -562,7 +905,7 @@ void Scene::slotCalculate()
     myCalc->setConcreteCenter(m_concreteCenter);
     myCalc->setReinfArea(m_reinfCircles);
     myCalc->setCenterPoint();
-    myCalc->setMomentsOfInertia();
+    myCalc->setMomentsOfInertia(m_concreteJx, m_concreteJy);
 }
 
 void Scene::slotFitView()
@@ -1064,6 +1407,17 @@ void Scene::checkForces()
 {
     if(m_NIsSet&&m_MxIsSet&&m_MyIsSet)
     {emit signalForcesDone(true);}
+}
+
+void Scene::switchPoint(QPointF& p1, QPointF& p2)
+{
+    QPointF temp;
+    temp.setX(p1.x());
+    temp.setY(p1.y());
+    p1.setX(p2.x());
+    p1.setY(p2.y());
+    p2.setX(temp.x());
+    p2.setY(temp.y());
 }
 
 void Scene::slotNewSection()

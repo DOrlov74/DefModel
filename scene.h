@@ -62,6 +62,7 @@ class Scene : public QGraphicsScene
     bool isBetween(QPointF, QPointF, QPointF);
     void Divide();
     void checkForces();
+    void switchPoint(QPointF&, QPointF&);
 
 public:
     explicit Scene(QWidget *parent = nullptr);

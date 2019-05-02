@@ -78,14 +78,14 @@ void Calculation::setCenterPoint()
     qDebug()<<"Center Point x;"+QString::number(m_centerPoint.x())+" y:"+QString::number(m_centerPoint.y());
 }
 
-void Calculation::setMomentsOfInertia()
+void Calculation::setMomentsOfInertia(const QVector<QVector<double>>& vJx, const QVector<QVector<double>>& vJy)
 {
     for (int i=0; i<m_concreteArea.size(); ++i)
     {
         for (int j=0; j<m_concreteArea[i].size(); ++j)
         {
-            m_Jx+=qPow(m_concreteCenter[i][j].y()-m_centerPoint.y(),2)*m_concreteArea[i][j];
-            m_Jy+=qPow(m_concreteCenter[i][j].x()-m_centerPoint.x(),2)*m_concreteArea[i][j];
+            m_Jx+=vJx[i][j]+qPow(m_concreteCenter[i][j].y()-m_centerPoint.y(),2)*m_concreteArea[i][j];
+            m_Jy+=vJy[i][j]+qPow(m_concreteCenter[i][j].x()-m_centerPoint.x(),2)*m_concreteArea[i][j];
         }
     }
     qDebug()<<"Jx="+QString::number(m_Jx)+" Jy="+QString::number(m_Jy);
