@@ -4,5 +4,6 @@
         <file>Icon/zoom_in1.ico</file>
         <file>Icon/zoom_out1.ico</file>
         <file>Icon/hand.ico</file>
+        <file>data.xls</file>
     </qresource>
 </RCC>

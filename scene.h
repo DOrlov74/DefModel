@@ -7,6 +7,7 @@
 #include <QVector>
 #include <QGraphicsItemGroup>
 #include <QAbstractGraphicsShapeItem>
+#include "excelinouthelper.h"
 
 class Scene : public QGraphicsScene
 {
@@ -69,6 +70,7 @@ public:
     drawMode getDrawMode();
     void setBasePoint(QPointF);
     int getCurrDiam();
+    void loadData();
 
 signals:
     void signalDrawMode(bool);
@@ -100,6 +102,8 @@ public slots:
     void slotSetN(QString);
     void slotSetMx(QString);
     void slotSetMy(QString);
+    void slotLoad();
+    void slotSave();
 
     // QGraphicsScene interface
 protected:

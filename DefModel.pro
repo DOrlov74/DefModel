@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui \
+         axcontainer
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -25,6 +26,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+    excelinouthelper.cpp \
         main.cpp \
         mainwindow.cpp \
     scene.cpp \
@@ -33,6 +35,7 @@ SOURCES += \
     calculation.cpp
 
 HEADERS += \
+    excelinouthelper.h \
         mainwindow.h \
     scene.h \
     commandwidget.h \

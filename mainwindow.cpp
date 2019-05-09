@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QIntValidator>
 #include <QDoubleValidator>
+//#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -97,6 +98,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->graphicsView, SIGNAL(signalViewInit()), myScene, SLOT(slotSceneInit()), Qt::QueuedConnection); //try to get actual size of Scene не работает
     QObject::connect(ui->graphicsView, SIGNAL(signalViewInit()), this, SLOT(setSceneSize()), Qt::QueuedConnection);     //try to get actual size of Scene  не работает
     ui->diameterSpinBox->setValue(myScene->getCurrDiam());
+    QObject::connect(ui->actionOpen, SIGNAL(triggered()), myScene, SLOT(slotLoad()));
+    QObject::connect(ui->actionSave, SIGNAL(triggered()), myScene, SLOT(slotSave()));
 }
 
 MainWindow::~MainWindow()

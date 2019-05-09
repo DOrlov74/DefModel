@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "scene.h"
 #include "view.h"
+#include "excelinouthelper.h"
 
 namespace Ui {
 class MainWindow;

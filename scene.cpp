@@ -11,6 +11,8 @@
 #include <QString>
 #include <QtMath>
 #include <cmath>
+#include <QFileDialog>
+#include <QMessageBox>
 
 Scene::Scene(QWidget *parent) : QGraphicsScene(parent)
 {
@@ -966,6 +968,52 @@ void Scene::slotSetMy(QString str)
         m_MyIsSet=false;
     }
     qDebug()<<"MyIsSet="<<m_MyIsSet;
+}
+
+void Scene::slotLoad()
+{
+    ExcelInOutHelper* myExcel=new ExcelInOutHelper();
+    myExcel->openFile(QFileDialog::getOpenFileName(nullptr, "Open file with data", "data.xls", "excel(*.xls *.xlsx)"));
+    setDrawLine();
+    for (int i=0; i<myExcel->getConcreteData().size(); ++i)
+    {
+        drawPoint(myExcel->getConcreteData()[i]);
+        emit signalPointAdded(toSceneCoord(myExcel->getConcreteData()[i]));
+    }
+    slotGetCommand("c");
+    setDrawPoint();
+    for (int i=0; i<myExcel->getReinfData().size(); ++i)
+    {
+        slotSetRDiameter(myExcel->getReinfData()[i].first);
+        drawPoint(myExcel->getReinfData()[i].second);
+        emit signalPointAdded(toSceneCoord(myExcel->getReinfData()[i].second));
+    }
+    slotGetCommand("d");
+}
+
+void Scene::slotSave()
+{
+    ExcelInOutHelper* myExcel=new ExcelInOutHelper();
+//    QString fileName=QFileDialog::getSaveFileName(this, "Save file with data", "data.xls", "excel(*.xls *.xlsx)");
+//    qDebug()<<fileName;
+    if (m_doneConcretePath&&m_doneReinforcement)
+    {
+        myExcel->saveFile(m_concretePoints, m_reinfCircles);
+    }
+    else
+    {
+       QMessageBox* msgBox= new QMessageBox();
+       msgBox->setWindowTitle("Warning");
+       if (m_doneConcretePath)
+       {
+           msgBox->setText("Draw Reinforcement first");
+       }
+       else
+       {
+           msgBox->setText("Draw Concrete section first");
+       }
+       msgBox->exec();
+    }
 }
 
 void Scene::setDrawLine()
