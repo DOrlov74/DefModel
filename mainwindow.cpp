@@ -100,6 +100,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->diameterSpinBox->setValue(myScene->getCurrDiam());
     QObject::connect(ui->actionOpen, SIGNAL(triggered()), myScene, SLOT(slotLoad()));
     QObject::connect(ui->actionSave, SIGNAL(triggered()), myScene, SLOT(slotSave()));
+    fillCClasses();
+    fillCCombobox();
+    QObject::connect(ui->concreteClassComboBox, SIGNAL(currentIndexChanged(QString)),this, SLOT(slotCClassChanged(QString)));
+    QObject::connect(this, SIGNAL(signalCClassChanged(double)),myScene, SLOT(slotSetEb(double)));
 }
 
 MainWindow::~MainWindow()
@@ -156,6 +160,37 @@ void MainWindow::slotZoomOut()
 void MainWindow::slotCoordChanged(QPointF point)
 {
     ui->statusBar->showMessage("x:"+ QString::number(point.x())+" y:"+ QString::number(point.y()));
+}
+
+void MainWindow::slotCClassChanged(QString str)
+{
+    emit signalCClassChanged(ui->concreteClassComboBox->currentData().value<double>());
+    qDebug()<<"in slot concrete class changed to "<<str;
+}
+
+void MainWindow::fillCClasses()
+{
+    m_cClasses.insert("B7,5",0.016);
+    m_cClasses.insert("B10",0.019);
+    m_cClasses.insert("B12,5",0.0215);
+    m_cClasses.insert("B15",0.024);
+    m_cClasses.insert("B20",0.0275);
+    m_cClasses.insert("B25",0.03);
+    m_cClasses.insert("B30",0.0325);
+    m_cClasses.insert("B35",0.0345);
+    m_cClasses.insert("B40",0.036);
+    m_cClasses.insert("B45",0.037);
+    m_cClasses.insert("B50",0.038);
+    m_cClasses.insert("B55",0.039);
+    m_cClasses.insert("B60",0.0395);
+}
+
+void MainWindow::fillCCombobox()
+{
+    for (QMap<QString,double>::const_iterator it=m_cClasses.constBegin(); it!=m_cClasses.constEnd(); ++it)
+    {
+        ui->concreteClassComboBox->addItem(it.key(),QVariant::fromValue(it.value()));
+    }
 }
 
 

@@ -105,3 +105,32 @@ void Calculation::setMy(double d)
 {
     m_My=d;
 }
+
+void Calculation::setAlfa()
+{
+    if(m_Mx==0||m_Jy==0)
+    {
+        if (m_My>0)
+        {
+            m_alfa=M_PI_2;
+        }
+        if (m_My<0)
+        {
+            m_alfa=-M_PI_2;
+        }
+        else
+        {
+            m_alfa=0;
+        }
+    }
+    else
+    {
+        m_alfa=qAtan(m_Jx/m_Jy*m_My/m_Mx);
+    }
+}
+
+void Calculation::slotSetEb(double d)
+{
+    m_Eb=d;
+    qDebug()<<"Eb is set to "<< d;
+}

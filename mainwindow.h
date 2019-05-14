@@ -14,9 +14,14 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
     Scene* myScene;
+    QMap<QString,double> m_cClasses;
+
+    void fillCClasses();
+    void fillCCombobox();
 
 signals:
     void signalKeyPressed(QString);
+    void signalCClassChanged(double);
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -32,6 +37,7 @@ public slots:
     void slotZoomIn();
     void slotZoomOut();
     void slotCoordChanged(QPointF);
+    void slotCClassChanged(QString);
 
 private:
     Ui::MainWindow *ui;

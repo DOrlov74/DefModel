@@ -23,6 +23,7 @@ Scene::Scene(QWidget *parent) : QGraphicsScene(parent)
     //emit signalGetRDiameter(m_currDiam);
     //qDebug()<<"Current diameter:"+QString::number(m_currDiam);
     myCalc=new Calculation;
+    QObject::connect(this, SIGNAL(signalCClassChanged(double)), myCalc, SLOT(slotSetEb(double)));
 }
 
 Scene::drawMode Scene::getDrawMode()
@@ -968,6 +969,11 @@ void Scene::slotSetMy(QString str)
         m_MyIsSet=false;
     }
     qDebug()<<"MyIsSet="<<m_MyIsSet;
+}
+
+void Scene::slotSetEb(double d)
+{
+    emit signalCClassChanged(d);
 }
 
 void Scene::slotLoad()
