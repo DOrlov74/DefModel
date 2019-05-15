@@ -85,7 +85,10 @@ signals:
     void signalFitView();
     void signalForcesDone(bool);
     //void signalGetRDiameter(int);
-    void signalCClassChanged(double);
+    void signalSetEb(double);
+    void signalSetEs(double);
+    void signalSetRb(double);
+    void signalSetRs(double);
 
 public slots:
     void setDrawLine();
@@ -104,6 +107,9 @@ public slots:
     void slotSetMx(QString);
     void slotSetMy(QString);
     void slotSetEb(double);
+    void slotSetEs(double);
+    void slotSetRb(double);
+    void slotSetRs(double);
     void slotLoad();
     void slotSave();
 

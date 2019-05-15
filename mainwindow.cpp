@@ -100,10 +100,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->diameterSpinBox->setValue(myScene->getCurrDiam());
     QObject::connect(ui->actionOpen, SIGNAL(triggered()), myScene, SLOT(slotLoad()));
     QObject::connect(ui->actionSave, SIGNAL(triggered()), myScene, SLOT(slotSave()));
-    fillCClasses();
-    fillCCombobox();
-    QObject::connect(ui->concreteClassComboBox, SIGNAL(currentIndexChanged(QString)),this, SLOT(slotCClassChanged(QString)));
-    QObject::connect(this, SIGNAL(signalCClassChanged(double)),myScene, SLOT(slotSetEb(double)));
+    QObject::connect(ui->concreteClassComboBox, SIGNAL(currentIndexChanged(QString)),this, SLOT(slotCClassChanged(QString)));       //send concrete class to slot
+    QObject::connect(this, SIGNAL(signalSetEb(double)),myScene, SLOT(slotSetEb(double)));                                           //send concrete modulus of elasticity to my scene
+    QObject::connect(this, SIGNAL(signalSetRb(double)),myScene, SLOT(slotSetRb(double)));                                           //send concrete compressive strength to my scene
+    fillCClasses();                                                                                                                 //fill container with concrete classes
+    fillCCombobox();                                                                                                                //fill combobox with concrete classes
+    QObject::connect(ui->reinforcementClassComboBox, SIGNAL(currentIndexChanged(QString)),this, SLOT(slotRClassChanged(QString)));  //send reinforcement class to slot
+    QObject::connect(this, SIGNAL(signalSetEs(double)),myScene, SLOT(slotSetEs(double)));                                           //send reinforcement modulus of elasticity to my scene
+    QObject::connect(this, SIGNAL(signalSetRs(double)),myScene, SLOT(slotSetRs(double)));                                           //send reinforcement tensile strength to my scene
+    fillRClasses();                                                                                                                 //fill container with reinforcement classes
+    fillRCombobox();                                                                                                                //fill combobox with reinforcement classes
 }
 
 MainWindow::~MainWindow()
@@ -164,32 +170,54 @@ void MainWindow::slotCoordChanged(QPointF point)
 
 void MainWindow::slotCClassChanged(QString str)
 {
-    emit signalCClassChanged(ui->concreteClassComboBox->currentData().value<double>());
+    emit signalSetEb(ui->concreteClassComboBox->currentData().value<QPair<double,double>>().first);
+    emit signalSetRb(ui->concreteClassComboBox->currentData().value<QPair<double,double>>().second);
     qDebug()<<"in slot concrete class changed to "<<str;
+}
+
+void MainWindow::slotRClassChanged(QString str)
+{
+    emit signalSetEs(ui->reinforcementClassComboBox->currentData().value<QPair<double,double>>().first);
+    emit signalSetRs(ui->reinforcementClassComboBox->currentData().value<QPair<double,double>>().second);
+    qDebug()<<"in slot reinforcement class changed to "<<str;
 }
 
 void MainWindow::fillCClasses()
 {
-    m_cClasses.insert("B7,5",0.016);
-    m_cClasses.insert("B10",0.019);
-    m_cClasses.insert("B12,5",0.0215);
-    m_cClasses.insert("B15",0.024);
-    m_cClasses.insert("B20",0.0275);
-    m_cClasses.insert("B25",0.03);
-    m_cClasses.insert("B30",0.0325);
-    m_cClasses.insert("B35",0.0345);
-    m_cClasses.insert("B40",0.036);
-    m_cClasses.insert("B45",0.037);
-    m_cClasses.insert("B50",0.038);
-    m_cClasses.insert("B55",0.039);
-    m_cClasses.insert("B60",0.0395);
+    m_cClasses.insert("B7,5",QPair<double,double>(16000,4.5));
+    m_cClasses.insert("B10",QPair<double,double>(19000,6));
+    m_cClasses.insert("B12,5",QPair<double,double>(21500,7.5));
+    m_cClasses.insert("B15",QPair<double,double>(24000,8.5));
+    m_cClasses.insert("B20",QPair<double,double>(27500,11.5));
+    m_cClasses.insert("B25",QPair<double,double>(30000,14.5));
+    m_cClasses.insert("B30",QPair<double,double>(32500,17));
+    m_cClasses.insert("B35",QPair<double,double>(34500,19.5));
+    m_cClasses.insert("B40",QPair<double,double>(36000,22));
+    m_cClasses.insert("B45",QPair<double,double>(37000,25));
+    m_cClasses.insert("B50",QPair<double,double>(38000,27.5));
+    m_cClasses.insert("B55",QPair<double,double>(39000,30));
+    m_cClasses.insert("B60",QPair<double,double>(39500,33));
 }
 
 void MainWindow::fillCCombobox()
 {
-    for (QMap<QString,double>::const_iterator it=m_cClasses.constBegin(); it!=m_cClasses.constEnd(); ++it)
+    for (QMap<QString,QPair<double,double>>::const_iterator it=m_cClasses.constBegin(); it!=m_cClasses.constEnd(); ++it)
     {
         ui->concreteClassComboBox->addItem(it.key(),QVariant::fromValue(it.value()));
+    }
+}
+
+void MainWindow::fillRClasses()
+{
+    m_rClasses.insert("A240",QPair<double,double>(210000,210));
+    m_rClasses.insert("A400",QPair<double,double>(200000,350));
+}
+
+void MainWindow::fillRCombobox()
+{
+    for (QMap<QString,QPair<double,double>>::const_iterator it=m_rClasses.constBegin(); it!=m_rClasses.constEnd(); ++it)
+    {
+        ui->reinforcementClassComboBox->addItem(it.key(),QVariant::fromValue(it.value()));
     }
 }
 

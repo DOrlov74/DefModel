@@ -76,6 +76,19 @@ void Calculation::setCenterPoint()
     m_centerPoint.setX(dStMomentX/m_area);
     m_centerPoint.setY(dStMomentY/m_area);
     qDebug()<<"Center Point x;"+QString::number(m_centerPoint.x())+" y:"+QString::number(m_centerPoint.y());
+    for (int i=0; i<m_concreteCenter.size(); ++i)
+    {
+        for (int j=0; j<m_concreteCenter[i].size(); ++j)
+        {
+            m_concreteCenter[i][j].setX(m_concreteCenter[i][j].x()-m_centerPoint.x());
+            m_concreteCenter[i][j].setY(m_concreteCenter[i][j].y()-m_centerPoint.y());
+        }
+    }
+    for (int i=0; i<m_reinfCenter.size(); ++i)
+    {
+        m_reinfCenter[i].setX(m_reinfCenter[i].x()-m_centerPoint.x());
+        m_reinfCenter[i].setY(m_reinfCenter[i].y()-m_centerPoint.y());
+    }
 }
 
 void Calculation::setMomentsOfInertia(const QVector<QVector<double>>& vJx, const QVector<QVector<double>>& vJy)
@@ -129,8 +142,209 @@ void Calculation::setAlfa()
     }
 }
 
+double Calculation::SigmaB(double d)
+{
+    if (d>=m_ebt1_red&&d<m_ebt2)
+    {
+        return m_Rbt;
+    }
+    else if(d<=-m_eb1_red&&d>-m_eb2)
+    {
+        return -m_Rb;
+    }
+    else if(d<0)
+    {
+        return d*m_Eb_red;
+    }
+    else
+    {
+        return d*m_Ebt_red;
+    }
+}
+
+double Calculation::SigmaS(double d)
+{
+    if (d>=m_es0&&d<m_es2)
+    {
+        return m_Rs;
+    }
+    else if(d<=-m_es0&&d>-m_es2)
+    {
+        return -m_Rs;
+    }
+    else
+    {
+        return d*m_Es;
+    }
+}
+
+void Calculation::setStartKbElast()
+{
+    m_KbElast.fill(QVector<double>(),nXdivisions);
+    for (int i=0; i<nXdivisions;++i)
+    {
+        m_KbElast[i].fill(1,nYdivisions);
+    }
+}
+
+void Calculation::setStartKrElast()
+{
+    m_KrElast.fill(1,m_reinfArea.size());
+}
+
+void Calculation::setD11()
+{
+    for (int i=0; i<m_concreteArea.size(); ++i)
+    {
+        for (int j=0; j<m_concreteArea[i].size(); ++j)
+        {
+            m_D11+=m_concreteArea[i][j]*qPow(m_concreteCenter[i][j].x(),2)*m_Eb*m_KbElast[i][j];
+        }
+    }
+    for (int i=0; i<m_reinfArea.size(); ++i)
+    {
+        m_D11+=m_reinfArea[i]*qPow(m_reinfCenter[i].x(),2)*m_Es*m_KrElast[i];
+    }
+}
+
+void Calculation::setD22()
+{
+    for (int i=0; i<m_concreteArea.size(); ++i)
+    {
+        for (int j=0; j<m_concreteArea[i].size(); ++j)
+        {
+            m_D22+=m_concreteArea[i][j]*qPow(m_concreteCenter[i][j].y(),2)*m_Eb*m_KbElast[i][j];
+        }
+    }
+    for (int i=0; i<m_reinfArea.size(); ++i)
+    {
+        m_D22+=m_reinfArea[i]*qPow(m_reinfCenter[i].y(),2)*m_Es*m_KrElast[i];
+    }
+}
+
+void Calculation::setD12()
+{
+    for (int i=0; i<m_concreteArea.size(); ++i)
+    {
+        for (int j=0; j<m_concreteArea[i].size(); ++j)
+        {
+            m_D12+=m_concreteArea[i][j]*m_concreteCenter[i][j].x()*m_concreteCenter[i][j].y()*m_Eb*m_KbElast[i][j];
+        }
+    }
+    for (int i=0; i<m_reinfArea.size(); ++i)
+    {
+        m_D12+=m_reinfArea[i]*m_reinfCenter[i].x()*m_reinfCenter[i].y()*m_Es*m_KrElast[i];
+    }
+}
+
+void Calculation::setD13()
+{
+    for (int i=0; i<m_concreteArea.size(); ++i)
+    {
+        for (int j=0; j<m_concreteArea[i].size(); ++j)
+        {
+            m_D13+=m_concreteArea[i][j]*m_concreteCenter[i][j].x()*m_Eb*m_KbElast[i][j];
+        }
+    }
+    for (int i=0; i<m_reinfArea.size(); ++i)
+    {
+        m_D13+=m_reinfArea[i]*m_reinfCenter[i].x()*m_Es*m_KrElast[i];
+    }
+}
+
+void Calculation::setD23()
+{
+    for (int i=0; i<m_concreteArea.size(); ++i)
+    {
+        for (int j=0; j<m_concreteArea[i].size(); ++j)
+        {
+            m_D23+=m_concreteArea[i][j]*m_concreteCenter[i][j].y()*m_Eb*m_KbElast[i][j];
+        }
+    }
+    for (int i=0; i<m_reinfArea.size(); ++i)
+    {
+        m_D23+=m_reinfArea[i]*m_reinfCenter[i].y()*m_Es*m_KrElast[i];
+    }
+}
+
+void Calculation::setD33()
+{
+    for (int i=0; i<m_concreteArea.size(); ++i)
+    {
+        for (int j=0; j<m_concreteArea[i].size(); ++j)
+        {
+            m_D33+=m_concreteArea[i][j]*m_Eb*m_KbElast[i][j];
+        }
+    }
+    for (int i=0; i<m_reinfArea.size(); ++i)
+    {
+        m_D33+=m_reinfArea[i]*m_Es*m_KrElast[i];
+    }
+}
+
+void Calculation::findCurv()
+{
+    if (m_D11!=0)
+    {
+        m_1rx=(m_Mx-m_D12*m_1ry-m_D13*m_e0)/m_D11;
+        if (m_D22!=0)
+        {
+            m_1ry=(m_My-m_D12*m_1rx-m_D23*m_e0)/m_D22;
+            if (m_D33!=0)
+            {
+                m_e0=(m_N-m_D13*m_1rx-m_D23*m_1ry)/m_D33;
+            }
+        }
+        qDebug()<<"1rx="<<m_1rx<<"1ry="<<m_1ry<<"e0="<<m_e0;
+    }
+    else if (m_D12!=0)
+    {
+        m_1ry=(m_Mx-m_D11*m_1rx-m_D13*m_e0)/m_D12;
+        m_1rx=(m_My-m_D22*m_1ry-m_D23*m_e0)/m_D12;
+        if (m_D33!=0)
+        {
+            m_e0=(m_N-m_D13*m_1rx-m_D23*m_1ry)/m_D33;
+        }
+        qDebug()<<"1rx="<<m_1rx<<"1ry="<<m_1ry<<"e0="<<m_e0;
+    }
+    else if (m_D13!=0)
+    {
+        m_e0=(m_Mx-m_D11*m_1rx-m_D12*m_1ry)/m_D13;
+        m_1rx=(m_N-m_D23*m_1ry-m_D33*m_e0)/m_D13;
+        if(m_D22!=0)
+        {
+            m_1ry=(m_My-m_D12*m_1rx-m_D23*m_e0)/m_D22;
+        }
+        qDebug()<<"1rx="<<m_1rx<<"1ry="<<m_1ry<<"e0="<<m_e0;
+    }
+    else
+    {
+        qDebug()<<"can't find solution";
+    }
+}
+
 void Calculation::slotSetEb(double d)
 {
     m_Eb=d;
     qDebug()<<"Eb is set to "<< d;
+}
+
+void Calculation::slotSetEs(double d)
+{
+    m_Es=d;
+    qDebug()<<"Es is set to "<< d;
+}
+
+void Calculation::slotSetRb(double d)
+{
+    m_Rb=d;
+    qDebug()<<"Rb is set to "<< d;
+    m_Eb_red=m_Rb/m_eb1_red;
+    m_Ebt_red=m_Rbt/m_ebt1_red;
+}
+
+void Calculation::slotSetRs(double d)
+{
+    m_Rs=d;
+    qDebug()<<"Rs is set to "<< d;
 }
