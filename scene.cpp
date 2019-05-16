@@ -912,6 +912,7 @@ void Scene::slotCalculate()
     myCalc->setReinfArea(m_reinfCircles);
     myCalc->setCenterPoint();
     myCalc->setMomentsOfInertia(m_concreteJx, m_concreteJy);
+    myCalc->calculate();
 }
 
 void Scene::slotFitView()
@@ -1129,6 +1130,7 @@ void Scene::slotGetCommand(QString str)
     {
         if (str=="d"||str=="D")
         {
+            qDebug()<<"draw mode is off";
             m_drawMode=NONE;
             m_doneReinforcement=true;
             emit signalReinfDone(true);
@@ -1149,6 +1151,7 @@ void Scene::slotGetCommand(QString str)
             p.setY(QString(match.captured(0)).toDouble());
         }
          drawPoint(fromSceneCoord(p));
+         emit signalPointAdded(p);
     }
 }
 
@@ -1378,12 +1381,12 @@ void Scene::Divide()
                     m_dividedFaces[i-1][j-1][0].append(m_dividedRegions[i-1][j-1].size());
                     m_dividedFaces[i-1][j-1][1].append(m_dividedRegions[i-1][j-1].size());
                 }
-                if(lowInterY1.x()>x1&&lowInterY1.x()<x2)                                            //low intersection is on the line with y=y1
+                if(lowInterY1.x()>=x1&&lowInterY1.x()<=x2)                                            //low intersection is on the line with y=y1
                 {
                     m_dividedRegions[i-1][j-1].append(QPointF(lowInterY1.x(),y1));
                     m_dividedFaces[i-1][j-1][1].append(m_dividedRegions[i-1][j-1].size());
                 }
-                if(highInterY1.x()>x1&&highInterY1.x()<x2&&lowInterY1.x()!=highInterY1.x())         //high intersection is on the line with y=y1
+                if(highInterY1.x()>=x1&&highInterY1.x()<=x2&&lowInterY1.x()!=highInterY1.x())         //high intersection is on the line with y=y1
                 {
                     m_dividedRegions[i-1][j-1].append(QPointF(highInterY1.x(),y1));
                     m_dividedFaces[i-1][j-1][1].append(m_dividedRegions[i-1][j-1].size());
@@ -1410,12 +1413,12 @@ void Scene::Divide()
                     m_dividedFaces[i-1][j-1][2].append(m_dividedRegions[i-1][j-1].size());
                     m_dividedFaces[i-1][j-1][3].append(m_dividedRegions[i-1][j-1].size());
                 }
-                if(lowInterY2.x()>x1&&lowInterY2.x()<x2)                                            //low intersection is on the line with y=y2
+                if(lowInterY2.x()>=x1&&lowInterY2.x()<=x2)                                            //low intersection is on the line with y=y2
                 {
                     m_dividedRegions[i-1][j-1].append(QPointF(lowInterY2.x(),y2));
                     m_dividedFaces[i-1][j-1][3].append(m_dividedRegions[i-1][j-1].size());
                 }
-                if(highInterY2.x()>x1&&highInterY2.x()<x2&&lowInterY2.x()!=highInterY2.x())         //high intersection is on the line with y=y2
+                if(highInterY2.x()>=x1&&highInterY2.x()<=x2&&lowInterY2.x()!=highInterY2.x())         //high intersection is on the line with y=y2
                 {
                     m_dividedRegions[i-1][j-1].append(QPointF(highInterY2.x(),y2));
                     m_dividedFaces[i-1][j-1][3].append(m_dividedRegions[i-1][j-1].size());
@@ -1592,7 +1595,7 @@ void Scene::drawPoint(const QPointF& point)
     {
         if (m_drawMode==POINT)
         {   //we are drawing a point as a reinforcement bar
-            pen.setBrush(QBrush(Qt::green));
+            pen.setBrush(QBrush(Qt::black));
             m_currentItem=this->addEllipse(point.x()-m_currDiam/2, point.y()-m_currDiam/2,m_currDiam,m_currDiam,pen);
             m_reinfItems.append(m_currentItem);
             m_reinfCircles.append(QPair<uint, QPointF>(m_currDiam, point));

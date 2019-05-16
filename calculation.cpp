@@ -282,8 +282,11 @@ void Calculation::setD33()
     }
 }
 
-void Calculation::findCurv()
+double Calculation::findCurv()
 {
+    double prev_1rx=m_1rx;
+    double prev_1ry=m_1ry;
+    double prev_e0=m_e0;
     if (m_D11!=0)
     {
         m_1rx=(m_Mx-m_D12*m_1ry-m_D13*m_e0)/m_D11;
@@ -295,7 +298,7 @@ void Calculation::findCurv()
                 m_e0=(m_N-m_D13*m_1rx-m_D23*m_1ry)/m_D33;
             }
         }
-        qDebug()<<"1rx="<<m_1rx<<"1ry="<<m_1ry<<"e0="<<m_e0;
+//        qDebug()<<"1rx="<<m_1rx<<"1ry="<<m_1ry<<"e0="<<m_e0;
     }
     else if (m_D12!=0)
     {
@@ -305,7 +308,7 @@ void Calculation::findCurv()
         {
             m_e0=(m_N-m_D13*m_1rx-m_D23*m_1ry)/m_D33;
         }
-        qDebug()<<"1rx="<<m_1rx<<"1ry="<<m_1ry<<"e0="<<m_e0;
+//        qDebug()<<"1rx="<<m_1rx<<"1ry="<<m_1ry<<"e0="<<m_e0;
     }
     else if (m_D13!=0)
     {
@@ -315,12 +318,138 @@ void Calculation::findCurv()
         {
             m_1ry=(m_My-m_D12*m_1rx-m_D23*m_e0)/m_D22;
         }
-        qDebug()<<"1rx="<<m_1rx<<"1ry="<<m_1ry<<"e0="<<m_e0;
+ //       qDebug()<<"1rx="<<m_1rx<<"1ry="<<m_1ry<<"e0="<<m_e0;
     }
     else
     {
-        qDebug()<<"can't find solution";
+        qDebug()<<"can't find curvature solution";
     }
+    return max(qFabs(m_1rx-prev_1rx),qFabs(m_1ry-prev_1ry),qFabs(m_e0-prev_e0));
+}
+
+void Calculation::setStrain()
+{
+    m_concreteStrain.fill(QVector<double>(),nXdivisions);
+    for (int i=0; i<m_concreteArea.size();++i)
+    {
+        m_concreteStrain[i].fill(0,nYdivisions);
+        for  (int j=0; j<m_concreteArea[i].size(); ++j)
+        {
+            m_concreteStrain[i][j]=m_e0+m_1rx*m_concreteCenter[i][j].x()+m_1ry*m_concreteCenter[i][j].y();
+//           qDebug()<<"Strain of concrete part in row:"+QString::number(i+1)+" in column:"+QString::number(j+1)+" is:"+QString::number(m_concreteStrain[i][j]);
+        }
+    }
+    m_reinfStrain.fill(0,m_reinfArea.size());
+    for (int i=0; i<m_reinfArea.size();++i)
+    {
+        m_reinfStrain[i]=m_e0+m_1rx*m_reinfCenter[i].x()+m_1ry*m_reinfCenter[i].y();
+//        qDebug()<<"Strain of reinforcement element:"+QString::number(m_reinfStrain[i]);
+    }
+}
+
+void Calculation::setStress()
+{
+    m_concreteStress.fill(QVector<double>(),nXdivisions);
+    for (int i=0; i<m_concreteArea.size();++i)
+    {
+        m_concreteStress[i].fill(0,nYdivisions);
+        for  (int j=0; j<m_concreteArea[i].size(); ++j)
+        {
+            m_concreteStress[i][j]=m_KbElast[i][j]*SigmaB(m_concreteStrain[i][j]);
+//            qDebug()<<"Stress in concrete part in row:"+QString::number(i+1)+" in column:"+QString::number(j+1)+" is:"+QString::number(m_concreteStress[i][j]);
+        }
+    }
+    m_reinfStress.fill(0,m_reinfArea.size());
+    for (int i=0; i<m_reinfArea.size();++i)
+    {
+        m_reinfStress[i]=m_KrElast[i]*SigmaS(m_reinfStrain[i]);
+//        qDebug()<<"Stress in reinforcement element:"+QString::number(m_reinfStress[i]);
+    }
+}
+
+double Calculation::checkForces()
+{
+    double calc_Mx=0;
+    double calc_My=0;
+    double calc_N=0;
+    for (int i=0; i<m_concreteArea.size();++i)
+    {
+        for  (int j=0; j<m_concreteArea[i].size(); ++j)
+        {
+            calc_Mx+=m_concreteStress[i][j]*m_concreteArea[i][j]*m_concreteCenter[i][j].x();
+            calc_My+=m_concreteStress[i][j]*m_concreteArea[i][j]*m_concreteCenter[i][j].y();
+            calc_N+=m_concreteStress[i][j]*m_concreteArea[i][j];
+        }
+    }
+    for (int i=0; i<m_reinfArea.size();++i)
+    {
+        calc_Mx+=m_reinfStress[i]*m_reinfArea[i]*m_reinfCenter[i].x();
+        calc_My+=m_reinfStress[i]*m_reinfArea[i]*m_reinfCenter[i].y();
+        calc_N+=m_reinfStress[i]*m_reinfArea[i];
+    }
+    return max(qFabs(m_Mx-calc_Mx),qFabs(m_My-calc_My),qFabs(m_N-calc_N));
+}
+
+void Calculation::setKElast()
+{
+    for (int i=0; i<m_concreteArea.size();++i)
+    {
+        for  (int j=0; j<m_concreteArea[i].size(); ++j)
+        {
+            if (m_concreteStrain[i][j]!=0)
+            {
+                m_KbElast[i][j]=m_concreteStress[i][j]/(m_concreteStrain[i][j]*(m_concreteStrain[i][j]>0?m_Ebt_red:m_Eb_red));
+            }
+        }
+    }
+    for (int i=0; i<m_reinfArea.size();++i)
+    {
+        if (m_reinfStrain[i]!=0)
+        {
+            m_KrElast[i]=m_reinfStress[i]/(m_reinfStrain[i]*m_Es);
+        }
+    }
+}
+
+double Calculation::max(double d1, double d2, double d3)
+{
+    if(d1>d2&&d1>d3)
+    {return d1;}
+    else if (d2>d1&&d2>d3)
+    {return d2;}
+    else
+    {return d3;}
+}
+
+void Calculation::calculate()
+{
+    int cur_it=0;
+    double curAccuracy=0;
+    do {
+        int innerIt=0;
+        double innerAccuracy=0;
+        ++cur_it;
+        setStartKbElast();
+        setStartKrElast();
+        setD11();
+        setD22();
+        setD12();
+        setD13();
+        setD23();
+        setD33();
+        do {
+            ++innerIt;
+            innerAccuracy=findCurv();
+            qDebug()<<"iteration:"<<innerIt<<" accuracy in curvature:"<<innerAccuracy;
+        }
+        while ((innerAccuracy>m_accuracy)||(innerIt<nIterations));
+        setStrain();
+        setStress();
+        setKElast();
+        curAccuracy=checkForces();
+        qDebug()<<"iteration:"<<cur_it<<" accuracy in equilibrium equation:"<<curAccuracy;
+    }
+    while ((curAccuracy>m_accuracy)||(cur_it<nIterations));
 }
 
 void Calculation::slotSetEb(double d)

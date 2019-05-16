@@ -1,6 +1,6 @@
 #include "commandwidget.h"
 #include <QDebug>
-#include <QKeyEvent>
+//#include <QKeyEvent>
 #include <QRegularExpression>
 
 commandWidget::commandWidget(QWidget *parent) : QTextEdit(parent)
@@ -92,6 +92,19 @@ void commandWidget::slotGetText()
             m_strPos=this->toPlainText().size();
         }
     }
+    if (m_drawPointMode)
+    {
+        QRegularExpression reg3("[d|c]+\\n", QRegularExpression::CaseInsensitiveOption);
+        QRegularExpressionMatch match=reg3.match(m_strCommand);
+        if (match.hasMatch())
+        {
+            qDebug()<<"filtered command: "<<match.captured(0);
+            m_strCommand=match.captured(0);
+            m_strCommand.chop(1);
+            emit signalCommand(m_strCommand);
+            m_strPos=this->toPlainText().size();
+        }
+    }
     if (m_DivideMode)
     {
         QRegularExpression reg2("[0-9]+\\n");
@@ -156,9 +169,12 @@ void commandWidget::slotDrawMode(bool b)
 
 //void commandWidget::keyPressEvent(QKeyEvent *event)
 //{
-//    if (event->key()==Qt::Key_Enter)
+//    if(event->key()==Qt::Key_C||event->key()==Qt::Key_D)
 //    {
-//        emit signalCommand(m_strCommand);
+//        if(m_drawPointMode)
+//        {
+//            slotAddKey(QKeySequence(event->key()).toString());
+//        }
 //    }
 //    QWidget::keyPressEvent(event);
 //}

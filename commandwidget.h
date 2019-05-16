@@ -34,7 +34,7 @@ public slots:
     void slotDrawMode(bool);
 
     // QWidget interface
-protected:
+//protected:
 //    virtual void keyPressEvent(QKeyEvent *event);
 };
 
