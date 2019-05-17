@@ -995,10 +995,10 @@ void Scene::slotSetRs(double d)
     emit signalSetRs(d);
 }
 
-void Scene::slotLoad()
+void Scene::slotImportPoints()
 {
     ExcelInOutHelper* myExcel=new ExcelInOutHelper();
-    myExcel->openFile(QFileDialog::getOpenFileName(nullptr, "Open file with data", "data.xls", "excel(*.xls *.xlsx)"));
+    myExcel->importPoints(QFileDialog::getOpenFileName(nullptr, "Open file with data", "data.xls", "excel(*.xls *.xlsx)"));
     setDrawLine();
     for (int i=0; i<myExcel->getConcreteData().size(); ++i)
     {
@@ -1016,14 +1016,14 @@ void Scene::slotLoad()
     slotGetCommand("d");
 }
 
-void Scene::slotSave()
+void Scene::slotExportPoints()
 {
     ExcelInOutHelper* myExcel=new ExcelInOutHelper();
 //    QString fileName=QFileDialog::getSaveFileName(this, "Save file with data", "data.xls", "excel(*.xls *.xlsx)");
 //    qDebug()<<fileName;
     if (m_doneConcretePath&&m_doneReinforcement)
     {
-        myExcel->saveFile(m_concretePoints, m_reinfCircles);
+        myExcel->exportPoints(m_concretePoints, m_reinfCircles);
     }
     else
     {
@@ -1365,65 +1365,65 @@ void Scene::Divide()
                     lowInterY2=vIntersectY[1][j];
                     highInterY2=vIntersectY[0][j];
                 }
-                if(lowInterX1.y()>=y1&&lowInterX1.y()<=y2)                                        //low intersection is on the line with x=x1
+                if(lowInterX1.y()>y1&&lowInterX1.y()<y2)                                        //low intersection is on the line with x=x1
                 {
                     m_dividedRegions[i-1][j-1].append(QPointF(x1,lowInterX1.y()));
                     m_dividedFaces[i-1][j-1][0].append(m_dividedRegions[i-1][j-1].size());
                 }
-                if(highInterX1.y()>=y1&&highInterX1.y()<=y2&&lowInterX1.y()!=highInterX1.y())     //high intersection is on the line with x=x1
+                if(highInterX1.y()>y1&&highInterX1.y()<y2&&lowInterX1.y()!=highInterX1.y())     //high intersection is on the line with x=x1
                 {
                     m_dividedRegions[i-1][j-1].append(QPointF(x1,highInterX1.y()));
                     m_dividedFaces[i-1][j-1][0].append(m_dividedRegions[i-1][j-1].size());
                 }
-                if((lowInterX1.y()<y1&&highInterX1.y()>y1)&&(lowInterY1.x()<x1&&highInterY1.x()>x1))   //point x1,y1 is inside the figure
+                if((lowInterX1.y()<=y1&&highInterX1.y()>=y1)&&(lowInterY1.x()<=x1&&highInterY1.x()>=x1))   //point x1,y1 is inside the figure
                 {
                     m_dividedRegions[i-1][j-1].append(QPointF(x1,y1));
                     m_dividedFaces[i-1][j-1][0].append(m_dividedRegions[i-1][j-1].size());
                     m_dividedFaces[i-1][j-1][1].append(m_dividedRegions[i-1][j-1].size());
                 }
-                if(lowInterY1.x()>=x1&&lowInterY1.x()<=x2)                                            //low intersection is on the line with y=y1
+                if(lowInterY1.x()>x1&&lowInterY1.x()<x2)                                            //low intersection is on the line with y=y1
                 {
                     m_dividedRegions[i-1][j-1].append(QPointF(lowInterY1.x(),y1));
                     m_dividedFaces[i-1][j-1][1].append(m_dividedRegions[i-1][j-1].size());
                 }
-                if(highInterY1.x()>=x1&&highInterY1.x()<=x2&&lowInterY1.x()!=highInterY1.x())         //high intersection is on the line with y=y1
+                if(highInterY1.x()>x1&&highInterY1.x()<x2&&lowInterY1.x()!=highInterY1.x())         //high intersection is on the line with y=y1
                 {
                     m_dividedRegions[i-1][j-1].append(QPointF(highInterY1.x(),y1));
                     m_dividedFaces[i-1][j-1][1].append(m_dividedRegions[i-1][j-1].size());
                 }
-                if((lowInterX2.y()<y1&&highInterX2.y()>y1)&&(lowInterY1.x()<x2&&highInterY1.x()>x2))   //point x2,y1 is inside the figure
+                if((lowInterX2.y()<=y1&&highInterX2.y()>=y1)&&(lowInterY1.x()<=x2&&highInterY1.x()>=x2))   //point x2,y1 is inside the figure
                 {
                     m_dividedRegions[i-1][j-1].append(QPointF(x2,y1));
                     m_dividedFaces[i-1][j-1][1].append(m_dividedRegions[i-1][j-1].size());
                     m_dividedFaces[i-1][j-1][2].append(m_dividedRegions[i-1][j-1].size());
                 }
-                if(lowInterX2.y()>=y1&&lowInterX2.y()<=y2)                                          //low intersection is on the line with x=x2
+                if(lowInterX2.y()>y1&&lowInterX2.y()<y2)                                          //low intersection is on the line with x=x2
                 {
                     m_dividedRegions[i-1][j-1].append(QPointF(x2,lowInterX2.y()));
                     m_dividedFaces[i-1][j-1][2].append(m_dividedRegions[i-1][j-1].size());
                 }
-                if(highInterX2.y()>=y1&&highInterX2.y()<=y2&&lowInterX2.y()!=highInterX2.y())       //high intersection is on the line with x=x2
+                if(highInterX2.y()>y1&&highInterX2.y()<y2&&lowInterX2.y()!=highInterX2.y())       //high intersection is on the line with x=x2
                 {
                     m_dividedRegions[i-1][j-1].append(QPointF(x2,highInterX2.y()));
                     m_dividedFaces[i-1][j-1][2].append(m_dividedRegions[i-1][j-1].size());
                 }
-                if((lowInterX2.y()<y2&&highInterX2.y()>y2)&&(lowInterY2.x()<x2&&highInterY2.x()>x2))   //point x2,y2 is inside the figure
+                if((lowInterX2.y()<=y2&&highInterX2.y()>=y2)&&(lowInterY2.x()<=x2&&highInterY2.x()>=x2))   //point x2,y2 is inside the figure
                 {
                     m_dividedRegions[i-1][j-1].append(QPointF(x2,y2));
                     m_dividedFaces[i-1][j-1][2].append(m_dividedRegions[i-1][j-1].size());
                     m_dividedFaces[i-1][j-1][3].append(m_dividedRegions[i-1][j-1].size());
                 }
-                if(lowInterY2.x()>=x1&&lowInterY2.x()<=x2)                                            //low intersection is on the line with y=y2
+                if(lowInterY2.x()>x1&&lowInterY2.x()<x2)                                            //low intersection is on the line with y=y2
                 {
                     m_dividedRegions[i-1][j-1].append(QPointF(lowInterY2.x(),y2));
                     m_dividedFaces[i-1][j-1][3].append(m_dividedRegions[i-1][j-1].size());
                 }
-                if(highInterY2.x()>=x1&&highInterY2.x()<=x2&&lowInterY2.x()!=highInterY2.x())         //high intersection is on the line with y=y2
+                if(highInterY2.x()>x1&&highInterY2.x()<x2&&lowInterY2.x()!=highInterY2.x())         //high intersection is on the line with y=y2
                 {
                     m_dividedRegions[i-1][j-1].append(QPointF(highInterY2.x(),y2));
                     m_dividedFaces[i-1][j-1][3].append(m_dividedRegions[i-1][j-1].size());
                 }
-                if((lowInterX1.y()<y2&&highInterX1.y()>y2)&&(lowInterY2.x()<x1&&highInterY2.x()>x1))   //point x1,y2 is inside the figure
+                if((lowInterX1.y()<=y2&&highInterX1.y()>=y2)&&(lowInterY2.x()<=x1&&highInterY2.x()>=x1))   //point x1,y2 is inside the figure
                 {
                     m_dividedRegions[i-1][j-1].append(QPointF(x1,y2));
                     m_dividedFaces[i-1][j-1][3].append(m_dividedRegions[i-1][j-1].size());

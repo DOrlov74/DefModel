@@ -423,12 +423,13 @@ double Calculation::max(double d1, double d2, double d3)
 
 void Calculation::calculate()
 {
-    int cur_it=0;
+    ExcelInOutHelper* myExcel=new ExcelInOutHelper();
     double curAccuracy=0;
-    do {
-        int innerIt=0;
+    myExcel->saveArea(m_concreteArea, m_reinfArea);
+    myExcel->saveCenterDist(m_concreteCenter, m_reinfCenter);
+    for (int cur_it=1; cur_it<nIterations; ++cur_it)
+    {
         double innerAccuracy=0;
-        ++cur_it;
         setStartKbElast();
         setStartKrElast();
         setD11();
@@ -437,19 +438,21 @@ void Calculation::calculate()
         setD13();
         setD23();
         setD33();
-        do {
-            ++innerIt;
+        for (int innerIt=1; innerIt<nIterations; ++innerIt)
+        {
             innerAccuracy=findCurv();
             qDebug()<<"iteration:"<<innerIt<<" accuracy in curvature:"<<innerAccuracy;
+            if (innerAccuracy<m_accuracy)
+            {break;}
         }
-        while ((innerAccuracy>m_accuracy)||(innerIt<nIterations));
         setStrain();
         setStress();
         setKElast();
         curAccuracy=checkForces();
         qDebug()<<"iteration:"<<cur_it<<" accuracy in equilibrium equation:"<<curAccuracy;
+        if (curAccuracy<m_accuracy)
+        {break;}
     }
-    while ((curAccuracy>m_accuracy)||(cur_it<nIterations));
 }
 
 void Calculation::slotSetEb(double d)

@@ -110,8 +110,8 @@ public slots:
     void slotSetEs(double);
     void slotSetRb(double);
     void slotSetRs(double);
-    void slotLoad();
-    void slotSave();
+    void slotImportPoints();
+    void slotExportPoints();
 
     // QGraphicsScene interface
 protected:

@@ -98,8 +98,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->graphicsView, SIGNAL(signalViewInit()), myScene, SLOT(slotSceneInit()), Qt::QueuedConnection); //try to get actual size of Scene не работает
     QObject::connect(ui->graphicsView, SIGNAL(signalViewInit()), this, SLOT(setSceneSize()), Qt::QueuedConnection);     //try to get actual size of Scene  не работает
     ui->diameterSpinBox->setValue(myScene->getCurrDiam());
-    QObject::connect(ui->actionOpen, SIGNAL(triggered()), myScene, SLOT(slotLoad()));
-    QObject::connect(ui->actionSave, SIGNAL(triggered()), myScene, SLOT(slotSave()));
+    QObject::connect(ui->actionOpen, SIGNAL(triggered()), myScene, SLOT(slotImportPoints()));
+    QObject::connect(ui->actionSave, SIGNAL(triggered()), myScene, SLOT(slotExportPoints()));
     QObject::connect(ui->concreteClassComboBox, SIGNAL(currentIndexChanged(QString)),this, SLOT(slotCClassChanged(QString)));       //send concrete class to slot
     QObject::connect(this, SIGNAL(signalSetEb(double)),myScene, SLOT(slotSetEb(double)));                                           //send concrete modulus of elasticity to my scene
     QObject::connect(this, SIGNAL(signalSetRb(double)),myScene, SLOT(slotSetRb(double)));                                           //send concrete compressive strength to my scene

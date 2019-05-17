@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QVector>
 #include <QPointF>
+#include "excelinouthelper.h"
 
 class Calculation : public QObject
 {

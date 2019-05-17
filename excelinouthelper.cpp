@@ -10,7 +10,7 @@ ExcelInOutHelper::ExcelInOutHelper(QObject *parent) : QObject(parent)
 
 }
 
-void ExcelInOutHelper::openFile(QString fileName, int sheetNumber)
+void ExcelInOutHelper::importPoints(QString fileName, int sheetNumber)
 {
     m_excel = new QAxObject( "Excel.Application", nullptr );
     m_workbooks=m_excel->querySubObject("Workbooks");
@@ -20,11 +20,11 @@ void ExcelInOutHelper::openFile(QString fileName, int sheetNumber)
     m_usedRange=m_sheet->querySubObject("UsedRange");
     m_rows=m_usedRange->querySubObject("Rows");
     m_cols=m_usedRange->querySubObject("Columns");
-//    QFile file1("I://Dan//C++//DEV-Qt//Labs//sheet2.html");
-//        file1.open(QIODevice::WriteOnly | QIODevice::Text);
-//        QTextStream out(&file1);
-//        out << m_sheet->generateDocumentation();
-//        file1.close();
+    QFile file1("D://temp//sheet2.html");
+        file1.open(QIODevice::WriteOnly | QIODevice::Text);
+        QTextStream out(&file1);
+        out << m_sheet->generateDocumentation();
+        file1.close();
     int firstRow=m_usedRange->property("Row").toInt();
     int firstCol=m_usedRange->property("Column").toInt();
     int nRows=m_rows->property("Count").toInt();
@@ -104,7 +104,7 @@ void ExcelInOutHelper::openFile(QString fileName, int sheetNumber)
     m_excel->dynamicCall("Quit()");
 }
 
-void ExcelInOutHelper::saveFile(const QVector<QPointF>& vCPoints, const QVector<QPair<uint,QPointF>>& vRPoints)
+void ExcelInOutHelper::exportPoints(const QVector<QPointF>& vCPoints, const QVector<QPair<uint,QPointF>>& vRPoints)
 {
     m_excel = new QAxObject( "Excel.Application", nullptr );
     m_excel->setProperty("DisplayAlerts", false);
@@ -138,6 +138,119 @@ void ExcelInOutHelper::saveFile(const QVector<QPointF>& vCPoints, const QVector<
     }
     QString fileName=QFileDialog::getSaveFileName(nullptr, "Save file with data", "data.xls", "excel(*.xls *.xlsx)");
     qDebug()<<fileName;
+    m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);
+    m_workbook->dynamicCall("Close()");
+    m_excel->dynamicCall("Quit()");
+}
+
+void ExcelInOutHelper::saveArea(const QVector<QVector<double>>& vCArea, const QVector<double>& vRArea)
+{
+    m_excel = new QAxObject( "Excel.Application", nullptr );
+    m_excel->setProperty("DisplayAlerts", false);
+    m_workbooks=m_excel->querySubObject("Workbooks");
+    m_workbook=m_workbooks->querySubObject("Add");
+    m_sheets=m_workbook->querySubObject("Worksheets");
+    m_sheet=m_sheets->querySubObject("Item(int)", 1);
+    int curRow=1;
+    int curCol=1;
+    QAxObject * cell = m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+    cell->setProperty("Value", "Concrete Area:");
+    for (int i=0; i<vCArea.size(); ++i)
+    {
+        for (int j=0; j<vCArea[i].size(); ++j)
+        {
+        ++curRow;
+        cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+        cell->setProperty("Value", QVariant(vCArea[i][j]));
+        }
+        if (i<vCArea.size()-1)
+        {curRow-=vCArea[i].size();}
+        ++curCol;
+    }
+    ++curRow;
+    curCol=1;
+    cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+    cell->setProperty("Value", "Reinforcement Area:");
+    ++curRow;
+    for (int i=0; i<vRArea.size(); ++i)
+    {
+        cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+        cell->setProperty("Value", QVariant(vRArea[i]));
+        ++curCol;
+    }
+    QString fileName=QDir::currentPath()+"/report.xls";
+    qDebug()<<fileName;
+    m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);
+    m_workbook->dynamicCall("Close()");
+    m_excel->dynamicCall("Quit()");
+}
+
+void ExcelInOutHelper::saveCenterDist(const QVector<QVector<QPointF>>& vCDist, const QVector<QPointF>& vRDist)
+{
+    QString fileName= QDir::currentPath()+"/report.xls";
+    m_excel = new QAxObject( "Excel.Application", nullptr );
+    m_excel->setProperty("DisplayAlerts", false);
+    m_workbooks=m_excel->querySubObject("Workbooks");
+    m_workbook=m_workbooks->querySubObject("Open(const QString&)", QFileInfo(fileName).absoluteFilePath());
+    m_sheets=m_workbook->querySubObject("Worksheets");
+    m_sheet=m_sheets->querySubObject("Item(int)", 1);
+    m_usedRange=m_sheet->querySubObject("UsedRange");
+    m_rows=m_usedRange->querySubObject("Rows");
+    m_cols=m_usedRange->querySubObject("Columns");
+    int curRow=m_rows->property("Count").toInt()+1;
+    int curCol=1;
+    QAxObject * cell = m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+    cell->setProperty("Value", "Distant of concrete section along X axis:");
+    for (int i=0; i<vCDist.size(); ++i)
+    {
+        for (int j=0; j<vCDist[i].size(); ++j)
+        {
+        ++curRow;
+        cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+        cell->setProperty("Value", QVariant(vCDist[i][j].x()));
+        }
+        if (i<vCDist.size()-1)
+        {curRow-=vCDist[i].size();}
+        ++curCol;
+    }
+    ++curRow;
+    curCol=1;
+    cell = m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+    cell->setProperty("Value", "Distant of concrete section along Y axis:");
+    for (int i=0; i<vCDist.size(); ++i)
+    {
+        for (int j=0; j<vCDist[i].size(); ++j)
+        {
+        ++curRow;
+        cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+        cell->setProperty("Value", QVariant(vCDist[i][j].y()));
+        }
+        if (i<vCDist.size()-1)
+        {curRow-=vCDist[i].size();}
+        ++curCol;
+    }
+    ++curRow;
+    curCol=1;
+    cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+    cell->setProperty("Value", "Distant of Reinforcement bar along X axis:");
+    ++curRow;
+    for (int i=0; i<vRDist.size(); ++i)
+    {
+        cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+        cell->setProperty("Value", QVariant(vRDist[i].x()));
+        ++curCol;
+    }
+    ++curRow;
+    curCol=1;
+    cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+    cell->setProperty("Value", "Distant of Reinforcement bar along Y axis:");
+    ++curRow;
+    for (int i=0; i<vRDist.size(); ++i)
+    {
+        cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+        cell->setProperty("Value", QVariant(vRDist[i].y()));
+        ++curCol;
+    }
     m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);
     m_workbook->dynamicCall("Close()");
     m_excel->dynamicCall("Quit()");
