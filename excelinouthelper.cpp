@@ -10,6 +10,18 @@ ExcelInOutHelper::ExcelInOutHelper(QObject *parent) : QObject(parent)
 
 }
 
+ExcelInOutHelper::~ExcelInOutHelper()
+{
+    delete m_excel;
+    delete m_workbooks;
+    delete m_workbook;
+    delete m_sheets;
+    delete m_sheet;
+    delete m_usedRange;
+    delete m_rows;
+    delete m_cols;
+}
+
 void ExcelInOutHelper::importPoints(QString fileName, int sheetNumber)
 {
     m_excel = new QAxObject( "Excel.Application", nullptr );
@@ -102,6 +114,7 @@ void ExcelInOutHelper::importPoints(QString fileName, int sheetNumber)
     }
     m_workbook->dynamicCall("Close()");
     m_excel->dynamicCall("Quit()");
+    delete cell;
 }
 
 void ExcelInOutHelper::exportPoints(const QVector<QPointF>& vCPoints, const QVector<QPair<uint,QPointF>>& vRPoints)
@@ -141,6 +154,7 @@ void ExcelInOutHelper::exportPoints(const QVector<QPointF>& vCPoints, const QVec
     m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);
     m_workbook->dynamicCall("Close()");
     m_excel->dynamicCall("Quit()");
+    delete cell;
 }
 
 void ExcelInOutHelper::saveArea(const QVector<QVector<double>>& vCArea, const QVector<double>& vRArea)
@@ -183,6 +197,7 @@ void ExcelInOutHelper::saveArea(const QVector<QVector<double>>& vCArea, const QV
     m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);
     m_workbook->dynamicCall("Close()");
     m_excel->dynamicCall("Quit()");
+    delete cell;
 }
 
 void ExcelInOutHelper::saveCenterDist(const QVector<QVector<QPointF>>& vCDist, const QVector<QPointF>& vRDist)
@@ -254,6 +269,7 @@ void ExcelInOutHelper::saveCenterDist(const QVector<QVector<QPointF>>& vCDist, c
     m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);
     m_workbook->dynamicCall("Close()");
     m_excel->dynamicCall("Quit()");
+    delete cell;
 }
 
 QVector<QPointF> ExcelInOutHelper::getConcreteData()

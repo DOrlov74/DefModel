@@ -24,6 +24,7 @@ class ExcelInOutHelper : public QObject
 
 public:
     explicit ExcelInOutHelper(QObject *parent = nullptr);
+    ~ExcelInOutHelper();
     void importPoints(QString, int=1);
     void exportPoints(const QVector<QPointF>&, const QVector<QPair<uint,QPointF>>&);
     void saveArea(const QVector<QVector<double>>&, const QVector<double>&);
