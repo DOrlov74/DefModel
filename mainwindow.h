@@ -14,7 +14,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
     Scene* myScene;
-    QMap<QString,QPair<double,double>> m_cClasses;        //container to store concrete classes with modulus of elasticity and tensile strength
+    QMap<QString,QVector<double>> m_cClasses;        //container to store concrete classes with modulus of elasticity and tensile strength
     QMap<QString,QPair<double,double>> m_rClasses;        //container to store reinforcement classes with modulus of elasticity and tensile strength
 
     void fillCClasses();
@@ -27,6 +27,7 @@ signals:
     void signalSetEb(double);
     void signalSetEs(double);
     void signalSetRb(double);
+    void signalSetRbt(double);
     void signalSetRs(double);
 
 public:

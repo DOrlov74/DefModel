@@ -94,6 +94,7 @@ public slots:
     void slotSetEb(double);
     void slotSetEs(double);
     void slotSetRb(double);
+    void slotSetRbt(double);
     void slotSetRs(double);
 
 };

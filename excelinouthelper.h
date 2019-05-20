@@ -29,6 +29,9 @@ public:
     void exportPoints(const QVector<QPointF>&, const QVector<QPair<uint,QPointF>>&);
     void saveArea(const QVector<QVector<double>>&, const QVector<double>&);
     void saveCenterDist(const QVector<QVector<QPointF>>&, const QVector<QPointF>&);
+    void saveKElast(const QVector<QVector<double>>&, const QVector<double>&);
+    void saveStrain(const QVector<QVector<double>>&, const QVector<double>&);
+    void saveStress(const QVector<QVector<double>>&, const QVector<double>&);
     QVector<QPointF> getConcreteData();
     QVector<QPair<uint,QPointF>> getReinfData();
 

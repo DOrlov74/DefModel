@@ -26,6 +26,7 @@ Scene::Scene(QWidget *parent) : QGraphicsScene(parent)
     QObject::connect(this, SIGNAL(signalSetEb(double)), myCalc, SLOT(slotSetEb(double)));
     QObject::connect(this, SIGNAL(signalSetEs(double)), myCalc, SLOT(slotSetEs(double)));
     QObject::connect(this, SIGNAL(signalSetRb(double)), myCalc, SLOT(slotSetRb(double)));
+    QObject::connect(this, SIGNAL(signalSetRbt(double)), myCalc, SLOT(slotSetRbt(double)));
     QObject::connect(this, SIGNAL(signalSetRs(double)), myCalc, SLOT(slotSetRs(double)));
 }
 
@@ -988,6 +989,11 @@ void Scene::slotSetEs(double d)
 void Scene::slotSetRb(double d)
 {
     emit signalSetRb(d);
+}
+
+void Scene::slotSetRbt(double d)
+{
+    emit signalSetRbt(d);
 }
 
 void Scene::slotSetRs(double d)

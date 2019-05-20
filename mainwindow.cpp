@@ -103,6 +103,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->concreteClassComboBox, SIGNAL(currentIndexChanged(QString)),this, SLOT(slotCClassChanged(QString)));       //send concrete class to slot
     QObject::connect(this, SIGNAL(signalSetEb(double)),myScene, SLOT(slotSetEb(double)));                                           //send concrete modulus of elasticity to my scene
     QObject::connect(this, SIGNAL(signalSetRb(double)),myScene, SLOT(slotSetRb(double)));                                           //send concrete compressive strength to my scene
+    QObject::connect(this, SIGNAL(signalSetRbt(double)),myScene, SLOT(slotSetRbt(double)));                                         //send concrete tensile strength to my scene
     fillCClasses();                                                                                                                 //fill container with concrete classes
     fillCCombobox();                                                                                                                //fill combobox with concrete classes
     QObject::connect(ui->reinforcementClassComboBox, SIGNAL(currentIndexChanged(QString)),this, SLOT(slotRClassChanged(QString)));  //send reinforcement class to slot
@@ -170,8 +171,9 @@ void MainWindow::slotCoordChanged(QPointF point)
 
 void MainWindow::slotCClassChanged(QString str)
 {
-    emit signalSetEb(ui->concreteClassComboBox->currentData().value<QPair<double,double>>().first);
-    emit signalSetRb(ui->concreteClassComboBox->currentData().value<QPair<double,double>>().second);
+    emit signalSetEb(ui->concreteClassComboBox->currentData().value<QVector<double>>()[0]);
+    emit signalSetRb(ui->concreteClassComboBox->currentData().value<QVector<double>>()[1]);
+    emit signalSetRbt(ui->concreteClassComboBox->currentData().value<QVector<double>>()[2]);
     qDebug()<<"in slot concrete class changed to "<<str;
 }
 
@@ -184,24 +186,24 @@ void MainWindow::slotRClassChanged(QString str)
 
 void MainWindow::fillCClasses()
 {
-    m_cClasses.insert("B7,5",QPair<double,double>(16000,4.5));
-    m_cClasses.insert("B10",QPair<double,double>(19000,6));
-    m_cClasses.insert("B12,5",QPair<double,double>(21500,7.5));
-    m_cClasses.insert("B15",QPair<double,double>(24000,8.5));
-    m_cClasses.insert("B20",QPair<double,double>(27500,11.5));
-    m_cClasses.insert("B25",QPair<double,double>(30000,14.5));
-    m_cClasses.insert("B30",QPair<double,double>(32500,17));
-    m_cClasses.insert("B35",QPair<double,double>(34500,19.5));
-    m_cClasses.insert("B40",QPair<double,double>(36000,22));
-    m_cClasses.insert("B45",QPair<double,double>(37000,25));
-    m_cClasses.insert("B50",QPair<double,double>(38000,27.5));
-    m_cClasses.insert("B55",QPair<double,double>(39000,30));
-    m_cClasses.insert("B60",QPair<double,double>(39500,33));
+    m_cClasses.insert("B7,5",QVector<double>{16000,4.5,0.48});
+    m_cClasses.insert("B10",QVector<double>{19000,6,0.56});
+    m_cClasses.insert("B12,5",QVector<double>{21500,7.5,0.66});
+    m_cClasses.insert("B15",QVector<double>{24000,8.5,0.75});
+    m_cClasses.insert("B20",QVector<double>{27500,11.5,0.9});
+    m_cClasses.insert("B25",QVector<double>{30000,14.5,1.05});
+    m_cClasses.insert("B30",QVector<double>{32500,17,1.15});
+    m_cClasses.insert("B35",QVector<double>{34500,19.5,1.3});
+    m_cClasses.insert("B40",QVector<double>{36000,22,1.4});
+    m_cClasses.insert("B45",QVector<double>{37000,25,1.5});
+    m_cClasses.insert("B50",QVector<double>{38000,27.5,1.6});
+    m_cClasses.insert("B55",QVector<double>{39000,30,1.7});
+    m_cClasses.insert("B60",QVector<double>{39500,33,1.8});
 }
 
 void MainWindow::fillCCombobox()
 {
-    for (QMap<QString,QPair<double,double>>::const_iterator it=m_cClasses.constBegin(); it!=m_cClasses.constEnd(); ++it)
+    for (QMap<QString,QVector<double>>::const_iterator it=m_cClasses.constBegin(); it!=m_cClasses.constEnd(); ++it)
     {
         ui->concreteClassComboBox->addItem(it.key(),QVariant::fromValue(it.value()));
     }

@@ -88,6 +88,7 @@ signals:
     void signalSetEb(double);
     void signalSetEs(double);
     void signalSetRb(double);
+    void signalSetRbt(double);
     void signalSetRs(double);
 
 public slots:
@@ -109,6 +110,7 @@ public slots:
     void slotSetEb(double);
     void slotSetEs(double);
     void slotSetRb(double);
+    void slotSetRbt(double);
     void slotSetRs(double);
     void slotImportPoints();
     void slotExportPoints();

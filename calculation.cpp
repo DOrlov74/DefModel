@@ -148,6 +148,10 @@ double Calculation::SigmaB(double d)
     {
         return m_Rbt;
     }
+    if ((d>=m_ebt2)||(d<=-m_eb2))
+    {
+        return 0;
+    }
     else if(d<=-m_eb1_red&&d>-m_eb2)
     {
         return -m_Rb;
@@ -427,11 +431,11 @@ void Calculation::calculate()
     double curAccuracy=0;
     myExcel->saveArea(m_concreteArea, m_reinfArea);
     myExcel->saveCenterDist(m_concreteCenter, m_reinfCenter);
+    setStartKbElast();
+    setStartKrElast();
     for (int cur_it=1; cur_it<nIterations; ++cur_it)
     {
         double innerAccuracy=0;
-        setStartKbElast();
-        setStartKrElast();
         setD11();
         setD22();
         setD12();
@@ -453,6 +457,9 @@ void Calculation::calculate()
         if (curAccuracy<m_accuracy)
         {break;}
     }
+    myExcel->saveKElast(m_KbElast, m_KrElast);
+    myExcel->saveStrain(m_concreteStrain, m_reinfStrain);
+    myExcel->saveStress(m_concreteStress, m_reinfStress);
 }
 
 void Calculation::slotSetEb(double d)
@@ -472,6 +479,12 @@ void Calculation::slotSetRb(double d)
     m_Rb=d;
     qDebug()<<"Rb is set to "<< d;
     m_Eb_red=m_Rb/m_eb1_red;
+}
+
+void Calculation::slotSetRbt(double d)
+{
+    m_Rbt=d;
+    qDebug()<<"Rbt is set to "<< d;
     m_Ebt_red=m_Rbt/m_ebt1_red;
 }
 

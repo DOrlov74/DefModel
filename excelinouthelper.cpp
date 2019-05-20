@@ -272,6 +272,141 @@ void ExcelInOutHelper::saveCenterDist(const QVector<QVector<QPointF>>& vCDist, c
     delete cell;
 }
 
+void ExcelInOutHelper::saveKElast(const QVector<QVector<double>>& vKbElast, const QVector<double>& vKrElast)
+{
+    QString fileName= QDir::currentPath()+"/report.xls";
+    m_excel = new QAxObject( "Excel.Application", nullptr );
+    m_excel->setProperty("DisplayAlerts", false);
+    m_workbooks=m_excel->querySubObject("Workbooks");
+    m_workbook=m_workbooks->querySubObject("Open(const QString&)", QFileInfo(fileName).absoluteFilePath());
+    m_sheets=m_workbook->querySubObject("Worksheets");
+    m_sheet=m_sheets->querySubObject("Item(int)", 1);
+    m_usedRange=m_sheet->querySubObject("UsedRange");
+    m_rows=m_usedRange->querySubObject("Rows");
+    m_cols=m_usedRange->querySubObject("Columns");
+    int curRow=m_rows->property("Count").toInt()+1;
+    int curCol=1;
+    QAxObject * cell = m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+    cell->setProperty("Value", "Coefficient of elasticy of concrete section:");
+    for (int i=0; i<vKbElast.size(); ++i)
+    {
+        for (int j=0; j<vKbElast[i].size(); ++j)
+        {
+        ++curRow;
+        cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+        cell->setProperty("Value", QVariant(vKbElast[i][j]));
+        }
+        if (i<vKbElast.size()-1)
+        {curRow-=vKbElast[i].size();}
+        ++curCol;
+    }
+    ++curRow;
+    curCol=1;
+    cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+    cell->setProperty("Value", "Coefficient of elasticy of Reinforcement bar:");
+    ++curRow;
+    for (int i=0; i<vKrElast.size(); ++i)
+    {
+        cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+        cell->setProperty("Value", QVariant(vKrElast[i]));
+        ++curCol;
+    }
+    m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);
+    m_workbook->dynamicCall("Close()");
+    m_excel->dynamicCall("Quit()");
+    delete cell;
+}
+
+void ExcelInOutHelper::saveStrain(const QVector<QVector<double>>& vCStrain, const QVector<double>& vRStrain)
+{
+    QString fileName= QDir::currentPath()+"/report.xls";
+    m_excel = new QAxObject( "Excel.Application", nullptr );
+    m_excel->setProperty("DisplayAlerts", false);
+    m_workbooks=m_excel->querySubObject("Workbooks");
+    m_workbook=m_workbooks->querySubObject("Open(const QString&)", QFileInfo(fileName).absoluteFilePath());
+    m_sheets=m_workbook->querySubObject("Worksheets");
+    m_sheet=m_sheets->querySubObject("Item(int)", 1);
+    m_usedRange=m_sheet->querySubObject("UsedRange");
+    m_rows=m_usedRange->querySubObject("Rows");
+    m_cols=m_usedRange->querySubObject("Columns");
+    int curRow=m_rows->property("Count").toInt()+1;
+    int curCol=1;
+    QAxObject * cell = m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+    cell->setProperty("Value", "Strain in concrete section:");
+    for (int i=0; i<vCStrain.size(); ++i)
+    {
+        for (int j=0; j<vCStrain[i].size(); ++j)
+        {
+        ++curRow;
+        cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+        cell->setProperty("Value", QVariant(vCStrain[i][j]));
+        }
+        if (i<vCStrain.size()-1)
+        {curRow-=vCStrain[i].size();}
+        ++curCol;
+    }
+    ++curRow;
+    curCol=1;
+    cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+    cell->setProperty("Value", "Strain in Reinforcement bar:");
+    ++curRow;
+    for (int i=0; i<vRStrain.size(); ++i)
+    {
+        cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+        cell->setProperty("Value", QVariant(vRStrain[i]));
+        ++curCol;
+    }
+    m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);
+    m_workbook->dynamicCall("Close()");
+    m_excel->dynamicCall("Quit()");
+    delete cell;
+}
+
+void ExcelInOutHelper::saveStress(const QVector<QVector<double>>& vCStress, const QVector<double>& vRStress)
+{
+    QString fileName= QDir::currentPath()+"/report.xls";
+    m_excel = new QAxObject( "Excel.Application", nullptr );
+    m_excel->setProperty("DisplayAlerts", false);
+    m_workbooks=m_excel->querySubObject("Workbooks");
+    m_workbook=m_workbooks->querySubObject("Open(const QString&)", QFileInfo(fileName).absoluteFilePath());
+    m_sheets=m_workbook->querySubObject("Worksheets");
+    m_sheet=m_sheets->querySubObject("Item(int)", 1);
+    m_usedRange=m_sheet->querySubObject("UsedRange");
+    m_rows=m_usedRange->querySubObject("Rows");
+    m_cols=m_usedRange->querySubObject("Columns");
+    int curRow=m_rows->property("Count").toInt()+1;
+    int curCol=1;
+    QAxObject * cell = m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+    cell->setProperty("Value", "Stress in concrete section:");
+    for (int i=0; i<vCStress.size(); ++i)
+    {
+        for (int j=0; j<vCStress[i].size(); ++j)
+        {
+        ++curRow;
+        cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+        cell->setProperty("Value", QVariant(vCStress[i][j]));
+        }
+        if (i<vCStress.size()-1)
+        {curRow-=vCStress[i].size();}
+        ++curCol;
+    }
+    ++curRow;
+    curCol=1;
+    cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+    cell->setProperty("Value", "Stress in Reinforcement bar:");
+    ++curRow;
+    for (int i=0; i<vRStress.size(); ++i)
+    {
+        cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+        cell->setProperty("Value", QVariant(vRStress[i]));
+        ++curCol;
+    }
+    m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);
+    m_workbook->dynamicCall("Close()");
+    m_excel->dynamicCall("Quit()");
+    delete cell;
+}
+
 QVector<QPointF> ExcelInOutHelper::getConcreteData()
 {
     return m_concreteData;
