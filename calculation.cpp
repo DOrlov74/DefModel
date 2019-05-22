@@ -27,7 +27,7 @@ void Calculation::setConcreteArea(const QVector<QVector<double>>& vArea)
         m_concreteArea[i].fill(0,nYdivisions);
         for  (int j=0; j<vArea[i].size(); ++j)
         {
-            m_concreteArea[i][j]=vArea[i][j];
+            m_concreteArea[i][j]=vArea[i][j]/1000000;
             qDebug()<<"Area of concrete part in row:"+QString::number(i+1)+" in column:"+QString::number(j+1)+" is:"+QString::number(m_concreteArea[i][j]);
         }
     }
@@ -41,8 +41,8 @@ void Calculation::setConcreteCenter(const QVector<QVector<QPointF>>& vCenter)
         m_concreteCenter[i].fill(QPointF(0,0),nYdivisions);
         for  (int j=0; j<vCenter[i].size(); ++j)
         {
-            m_concreteCenter[i][j].setX(vCenter[i][j].x());
-            m_concreteCenter[i][j].setY(vCenter[i][j].y());
+            m_concreteCenter[i][j].setX(vCenter[i][j].x()/1000);
+            m_concreteCenter[i][j].setY(vCenter[i][j].y()/1000);
             qDebug()<<"Center point of concrete part in row:"+QString::number(i+1)+" in column:"+QString::number(j+1)+" is at x:"+QString::number(m_concreteCenter[i][j].x())+" y:"+QString::number(m_concreteCenter[i][j].y());
         }
     }
@@ -54,8 +54,9 @@ void Calculation::setReinfArea(const QVector<QPair<uint, QPointF>>& vReinf)
     m_reinfCenter.fill(QPointF(0,0),vReinf.size());
     for (int i=0; i<vReinf.size();++i)
     {
-        m_reinfArea[i]=M_PI*qPow(vReinf[i].first,2)/4;
-        m_reinfCenter[i]=vReinf[i].second;
+        m_reinfArea[i]=M_PI*qPow(vReinf[i].first,2)/4000000;
+        m_reinfCenter[i].setX(vReinf[i].second.x()/1000);
+        m_reinfCenter[i].setY(vReinf[i].second.y()/1000);
         qDebug()<<"Center point of reinforcement bar:"+QString::number(i+1)+" is at x:"+QString::number(m_reinfCenter[i].x())+" y:"+QString::number(m_reinfCenter[i].y());
     }
 }
@@ -64,6 +65,7 @@ void Calculation::setCenterPoint()
 {
     double dStMomentY=0;
     double dStMomentX=0;
+    m_area=0;
     for (int i=0; i<m_concreteArea.size(); ++i)
     {
         for (int j=0; j<m_concreteArea[i].size(); ++j)
@@ -93,12 +95,14 @@ void Calculation::setCenterPoint()
 
 void Calculation::setMomentsOfInertia(const QVector<QVector<double>>& vJx, const QVector<QVector<double>>& vJy)
 {
+    m_Jx=0;
+    m_Jy=0;
     for (int i=0; i<m_concreteArea.size(); ++i)
     {
         for (int j=0; j<m_concreteArea[i].size(); ++j)
         {
-            m_Jx+=vJx[i][j]+qPow(m_concreteCenter[i][j].y()-m_centerPoint.y(),2)*m_concreteArea[i][j];
-            m_Jy+=vJy[i][j]+qPow(m_concreteCenter[i][j].x()-m_centerPoint.x(),2)*m_concreteArea[i][j];
+            m_Jx+=vJx[i][j]/1000000000000+qPow(m_concreteCenter[i][j].y()-m_centerPoint.y(),2)*m_concreteArea[i][j];
+            m_Jy+=vJy[i][j]/1000000000000+qPow(m_concreteCenter[i][j].x()-m_centerPoint.x(),2)*m_concreteArea[i][j];
         }
     }
     qDebug()<<"Jx="+QString::number(m_Jx)+" Jy="+QString::number(m_Jy);
@@ -176,6 +180,10 @@ double Calculation::SigmaS(double d)
     {
         return -m_Rs;
     }
+    else if(d<=-m_es2||d>=m_es2)
+    {
+        return 0;
+    }
     else
     {
         return d*m_Es;
@@ -196,8 +204,18 @@ void Calculation::setStartKrElast()
     m_KrElast.fill(1,m_reinfArea.size());
 }
 
+void Calculation::setStartvEb()
+{
+    m_vEb.fill(QVector<double>(),nXdivisions);
+    for (int i=0; i<nXdivisions;++i)
+    {
+        m_vEb[i].fill(m_Eb_red,nYdivisions);
+    }
+}
+
 void Calculation::setD11()
 {
+    m_D11=0;
     for (int i=0; i<m_concreteArea.size(); ++i)
     {
         for (int j=0; j<m_concreteArea[i].size(); ++j)
@@ -213,6 +231,7 @@ void Calculation::setD11()
 
 void Calculation::setD22()
 {
+    m_D22=0;
     for (int i=0; i<m_concreteArea.size(); ++i)
     {
         for (int j=0; j<m_concreteArea[i].size(); ++j)
@@ -228,6 +247,7 @@ void Calculation::setD22()
 
 void Calculation::setD12()
 {
+    m_D12=0;
     for (int i=0; i<m_concreteArea.size(); ++i)
     {
         for (int j=0; j<m_concreteArea[i].size(); ++j)
@@ -243,6 +263,7 @@ void Calculation::setD12()
 
 void Calculation::setD13()
 {
+    m_D13=0;
     for (int i=0; i<m_concreteArea.size(); ++i)
     {
         for (int j=0; j<m_concreteArea[i].size(); ++j)
@@ -258,6 +279,7 @@ void Calculation::setD13()
 
 void Calculation::setD23()
 {
+    m_D23=0;
     for (int i=0; i<m_concreteArea.size(); ++i)
     {
         for (int j=0; j<m_concreteArea[i].size(); ++j)
@@ -273,6 +295,7 @@ void Calculation::setD23()
 
 void Calculation::setD33()
 {
+    m_D33=0;
     for (int i=0; i<m_concreteArea.size(); ++i)
     {
         for (int j=0; j<m_concreteArea[i].size(); ++j)
@@ -359,14 +382,14 @@ void Calculation::setStress()
         m_concreteStress[i].fill(0,nYdivisions);
         for  (int j=0; j<m_concreteArea[i].size(); ++j)
         {
-            m_concreteStress[i][j]=m_KbElast[i][j]*SigmaB(m_concreteStrain[i][j]);
+            m_concreteStress[i][j]=SigmaB(m_concreteStrain[i][j]);  //*m_KbElast[i][j]
 //            qDebug()<<"Stress in concrete part in row:"+QString::number(i+1)+" in column:"+QString::number(j+1)+" is:"+QString::number(m_concreteStress[i][j]);
         }
     }
     m_reinfStress.fill(0,m_reinfArea.size());
     for (int i=0; i<m_reinfArea.size();++i)
     {
-        m_reinfStress[i]=m_KrElast[i]*SigmaS(m_reinfStrain[i]);
+        m_reinfStress[i]=SigmaS(m_reinfStrain[i]);  //*m_KrElast[i]
 //        qDebug()<<"Stress in reinforcement element:"+QString::number(m_reinfStress[i]);
     }
 }
@@ -403,6 +426,7 @@ void Calculation::setKElast()
             if (m_concreteStrain[i][j]!=0)
             {
                 m_KbElast[i][j]=m_concreteStress[i][j]/(m_concreteStrain[i][j]*(m_concreteStrain[i][j]>0?m_Ebt_red:m_Eb_red));
+                m_vEb[i][j]=(m_concreteStrain[i][j]>0?m_Ebt_red:m_Eb_red);
             }
         }
     }
@@ -433,6 +457,7 @@ void Calculation::calculate()
     myExcel->saveCenterDist(m_concreteCenter, m_reinfCenter);
     setStartKbElast();
     setStartKrElast();
+    setStartvEb();
     for (int cur_it=1; cur_it<nIterations; ++cur_it)
     {
         double innerAccuracy=0;
@@ -446,7 +471,7 @@ void Calculation::calculate()
         {
             innerAccuracy=findCurv();
             qDebug()<<"iteration:"<<innerIt<<" accuracy in curvature:"<<innerAccuracy;
-            if (innerAccuracy<m_accuracy)
+            if (innerAccuracy*1000<m_accuracy)
             {break;}
         }
         setStrain();
@@ -458,38 +483,40 @@ void Calculation::calculate()
         {break;}
     }
     myExcel->saveKElast(m_KbElast, m_KrElast);
+    myExcel->savevEb(m_vEb);
     myExcel->saveStrain(m_concreteStrain, m_reinfStrain);
     myExcel->saveStress(m_concreteStress, m_reinfStress);
 }
 
 void Calculation::slotSetEb(double d)
 {
-    m_Eb=d;
+    m_Eb=d*1000;
     qDebug()<<"Eb is set to "<< d;
 }
 
 void Calculation::slotSetEs(double d)
 {
-    m_Es=d;
+    m_Es=d*1000;
     qDebug()<<"Es is set to "<< d;
 }
 
 void Calculation::slotSetRb(double d)
 {
-    m_Rb=d;
+    m_Rb=d*1000;
     qDebug()<<"Rb is set to "<< d;
     m_Eb_red=m_Rb/m_eb1_red;
 }
 
 void Calculation::slotSetRbt(double d)
 {
-    m_Rbt=d;
+    m_Rbt=d*1000;
     qDebug()<<"Rbt is set to "<< d;
     m_Ebt_red=m_Rbt/m_ebt1_red;
 }
 
 void Calculation::slotSetRs(double d)
 {
-    m_Rs=d;
+    m_Rs=d*1000;
     qDebug()<<"Rs is set to "<< d;
+    m_es0=m_Rs/m_Es;
 }

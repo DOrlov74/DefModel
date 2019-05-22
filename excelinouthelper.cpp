@@ -168,7 +168,7 @@ void ExcelInOutHelper::saveArea(const QVector<QVector<double>>& vCArea, const QV
     int curRow=1;
     int curCol=1;
     QAxObject * cell = m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
-    cell->setProperty("Value", "Concrete Area:");
+    cell->setProperty("Value", "Concrete Area in m2:");
     for (int i=0; i<vCArea.size(); ++i)
     {
         for (int j=0; j<vCArea[i].size(); ++j)
@@ -184,7 +184,7 @@ void ExcelInOutHelper::saveArea(const QVector<QVector<double>>& vCArea, const QV
     ++curRow;
     curCol=1;
     cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
-    cell->setProperty("Value", "Reinforcement Area:");
+    cell->setProperty("Value", "Reinforcement Area in m2:");
     ++curRow;
     for (int i=0; i<vRArea.size(); ++i)
     {
@@ -215,7 +215,7 @@ void ExcelInOutHelper::saveCenterDist(const QVector<QVector<QPointF>>& vCDist, c
     int curRow=m_rows->property("Count").toInt()+1;
     int curCol=1;
     QAxObject * cell = m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
-    cell->setProperty("Value", "Distant of concrete section along X axis:");
+    cell->setProperty("Value", "Distant of concrete section from center point along X axis in m:");
     for (int i=0; i<vCDist.size(); ++i)
     {
         for (int j=0; j<vCDist[i].size(); ++j)
@@ -231,7 +231,7 @@ void ExcelInOutHelper::saveCenterDist(const QVector<QVector<QPointF>>& vCDist, c
     ++curRow;
     curCol=1;
     cell = m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
-    cell->setProperty("Value", "Distant of concrete section along Y axis:");
+    cell->setProperty("Value", "Distant of concrete section from center point along Y axis in m:");
     for (int i=0; i<vCDist.size(); ++i)
     {
         for (int j=0; j<vCDist[i].size(); ++j)
@@ -247,7 +247,7 @@ void ExcelInOutHelper::saveCenterDist(const QVector<QVector<QPointF>>& vCDist, c
     ++curRow;
     curCol=1;
     cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
-    cell->setProperty("Value", "Distant of Reinforcement bar along X axis:");
+    cell->setProperty("Value", "Distant of Reinforcement bar from center point along X axis in m:");
     ++curRow;
     for (int i=0; i<vRDist.size(); ++i)
     {
@@ -258,7 +258,7 @@ void ExcelInOutHelper::saveCenterDist(const QVector<QVector<QPointF>>& vCDist, c
     ++curRow;
     curCol=1;
     cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
-    cell->setProperty("Value", "Distant of Reinforcement bar along Y axis:");
+    cell->setProperty("Value", "Distant of Reinforcement bar from center point along Y axis in m:");
     ++curRow;
     for (int i=0; i<vRDist.size(); ++i)
     {
@@ -317,6 +317,40 @@ void ExcelInOutHelper::saveKElast(const QVector<QVector<double>>& vKbElast, cons
     delete cell;
 }
 
+void ExcelInOutHelper::savevEb(const QVector<QVector<double>>& vEb)
+{
+    QString fileName= QDir::currentPath()+"/report.xls";
+    m_excel = new QAxObject( "Excel.Application", nullptr );
+    m_excel->setProperty("DisplayAlerts", false);
+    m_workbooks=m_excel->querySubObject("Workbooks");
+    m_workbook=m_workbooks->querySubObject("Open(const QString&)", QFileInfo(fileName).absoluteFilePath());
+    m_sheets=m_workbook->querySubObject("Worksheets");
+    m_sheet=m_sheets->querySubObject("Item(int)", 1);
+    m_usedRange=m_sheet->querySubObject("UsedRange");
+    m_rows=m_usedRange->querySubObject("Rows");
+    m_cols=m_usedRange->querySubObject("Columns");
+    int curRow=m_rows->property("Count").toInt()+1;
+    int curCol=1;
+    QAxObject * cell = m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+    cell->setProperty("Value", "Modulus of elasticy of concrete section in MPa:");
+    for (int i=0; i<vEb.size(); ++i)
+    {
+        for (int j=0; j<vEb[i].size(); ++j)
+        {
+        ++curRow;
+        cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
+        cell->setProperty("Value", QVariant(vEb[i][j]/1000));
+        }
+        if (i<vEb.size()-1)
+        {curRow-=vEb[i].size();}
+        ++curCol;
+    }
+    m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);
+    m_workbook->dynamicCall("Close()");
+    m_excel->dynamicCall("Quit()");
+    delete cell;
+}
+
 void ExcelInOutHelper::saveStrain(const QVector<QVector<double>>& vCStrain, const QVector<double>& vRStrain)
 {
     QString fileName= QDir::currentPath()+"/report.xls";
@@ -332,14 +366,14 @@ void ExcelInOutHelper::saveStrain(const QVector<QVector<double>>& vCStrain, cons
     int curRow=m_rows->property("Count").toInt()+1;
     int curCol=1;
     QAxObject * cell = m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
-    cell->setProperty("Value", "Strain in concrete section:");
+    cell->setProperty("Value", "Strain in concrete section x1000:");
     for (int i=0; i<vCStrain.size(); ++i)
     {
         for (int j=0; j<vCStrain[i].size(); ++j)
         {
         ++curRow;
         cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
-        cell->setProperty("Value", QVariant(vCStrain[i][j]));
+        cell->setProperty("Value", QVariant(vCStrain[i][j]*1000));
         }
         if (i<vCStrain.size()-1)
         {curRow-=vCStrain[i].size();}
@@ -348,12 +382,12 @@ void ExcelInOutHelper::saveStrain(const QVector<QVector<double>>& vCStrain, cons
     ++curRow;
     curCol=1;
     cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
-    cell->setProperty("Value", "Strain in Reinforcement bar:");
+    cell->setProperty("Value", "Strain in Reinforcement bar x1000:");
     ++curRow;
     for (int i=0; i<vRStrain.size(); ++i)
     {
         cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
-        cell->setProperty("Value", QVariant(vRStrain[i]));
+        cell->setProperty("Value", QVariant(vRStrain[i]*1000));
         ++curCol;
     }
     m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);
@@ -377,14 +411,14 @@ void ExcelInOutHelper::saveStress(const QVector<QVector<double>>& vCStress, cons
     int curRow=m_rows->property("Count").toInt()+1;
     int curCol=1;
     QAxObject * cell = m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
-    cell->setProperty("Value", "Stress in concrete section:");
+    cell->setProperty("Value", "Stress in concrete section in MPa:");
     for (int i=0; i<vCStress.size(); ++i)
     {
         for (int j=0; j<vCStress[i].size(); ++j)
         {
         ++curRow;
         cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
-        cell->setProperty("Value", QVariant(vCStress[i][j]));
+        cell->setProperty("Value", QVariant(vCStress[i][j]/1000));
         }
         if (i<vCStress.size()-1)
         {curRow-=vCStress[i].size();}
@@ -393,12 +427,12 @@ void ExcelInOutHelper::saveStress(const QVector<QVector<double>>& vCStress, cons
     ++curRow;
     curCol=1;
     cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
-    cell->setProperty("Value", "Stress in Reinforcement bar:");
+    cell->setProperty("Value", "Stress in Reinforcement bar in MPa:");
     ++curRow;
     for (int i=0; i<vRStress.size(); ++i)
     {
         cell=m_sheet->querySubObject("Cells(int,int)", curRow, curCol );
-        cell->setProperty("Value", QVariant(vRStress[i]));
+        cell->setProperty("Value", QVariant(vRStress[i]/1000));
         ++curCol;
     }
     m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);

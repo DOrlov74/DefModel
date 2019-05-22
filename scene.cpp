@@ -224,8 +224,8 @@ void Scene::slotCalculate()
                         }
                         if (nFreeFaces==0)         //rectange fill all figure
                         {
-                            m_concreteJx[i-1][j-1]=dWidth*qPow(dHeight,3)/12;
-                            m_concreteJy[i-1][j-1]=qPow(dWidth,3)*dHeight/12;
+                            m_concreteJx[i][j]=dWidth*qPow(dHeight,3)/12;
+                            m_concreteJy[i][j]=qPow(dWidth,3)*dHeight/12;
                             JxIsSet=true;
                         }
                         else if (nFreeFaces==1)     //only one face is free
@@ -1126,7 +1126,7 @@ void Scene::slotGetCommand(QString str)
             pen.setBrush(Qt::black);
             // pen.setWidth(1);
             brush.setColor(Qt::yellow);
-            this->addPath(*m_concretePath, pen, brush);
+            this->addPath(*m_concretePath, pen, QBrush(QColor(0,180,220,100)));
             emit signalDrawMode(false);
             emit signalSectDone(true);
             getSectSizes();
@@ -1595,14 +1595,14 @@ void Scene::drawPoint(const QPointF& point)
         // pen.setWidth(1);
         brush.setColor(Qt::yellow); //не работает
         //this->addPolygon(m_concretePath->toFillPolygon(), pen, brush);
-        this->addPath(*m_concretePath, pen, brush);
+        this->addPath(*m_concretePath, pen, QBrush(QColor(0,180,220,100)));
     }
     if (m_drawMode!=NONE)
     {
         if (m_drawMode==POINT)
         {   //we are drawing a point as a reinforcement bar
             pen.setBrush(QBrush(Qt::black));
-            m_currentItem=this->addEllipse(point.x()-m_currDiam/2, point.y()-m_currDiam/2,m_currDiam,m_currDiam,pen);
+            m_currentItem=this->addEllipse(point.x()-m_currDiam/2, point.y()-m_currDiam/2,m_currDiam,m_currDiam,pen,QBrush(QColor(180,0,220,100)));
             m_reinfItems.append(m_currentItem);
             m_reinfCircles.append(QPair<uint, QPointF>(m_currDiam, point));
         }

@@ -380,7 +380,7 @@
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>80</width>
+                 <width>60</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -389,6 +389,19 @@
                  <width>0</width>
                  <height>0</height>
                 </size>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="NUnitLabel">
+               <property name="minimumSize">
+                <size>
+                 <width>20</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>kN</string>
                </property>
               </widget>
              </item>
@@ -425,9 +438,22 @@
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>80</width>
+                 <width>60</width>
                  <height>16777215</height>
                 </size>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="MyUnitLabel">
+               <property name="minimumSize">
+                <size>
+                 <width>20</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>kNm</string>
                </property>
               </widget>
              </item>
@@ -464,9 +490,22 @@
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>80</width>
+                 <width>60</width>
                  <height>16777215</height>
                 </size>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="MxUnitLabel">
+               <property name="minimumSize">
+                <size>
+                 <width>20</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>kNm</string>
                </property>
               </widget>
              </item>

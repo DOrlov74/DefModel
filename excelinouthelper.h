@@ -30,6 +30,7 @@ public:
     void saveArea(const QVector<QVector<double>>&, const QVector<double>&);
     void saveCenterDist(const QVector<QVector<QPointF>>&, const QVector<QPointF>&);
     void saveKElast(const QVector<QVector<double>>&, const QVector<double>&);
+    void savevEb(const QVector<QVector<double>>&);
     void saveStrain(const QVector<QVector<double>>&, const QVector<double>&);
     void saveStress(const QVector<QVector<double>>&, const QVector<double>&);
     QVector<QPointF> getConcreteData();

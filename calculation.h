@@ -33,12 +33,13 @@ class Calculation : public QObject
     double m_Rs=0;              //Tensile strength of reinforcement steel
     const double m_eb1_red=0.0015;      //Strain at reaching the maximum concrete compressive strength
     const double m_eb2=0.0035;          //The ultimate concrete compressive strain
-    const double m_ebt1_red=0.0008;     //Strain at reaching the maximum concrete tensile strength
-    const double m_ebt2=0.00015;        //The ultimate concrete tensile strain
+    const double m_ebt1_red=0.000000008;     //Strain at reaching the maximum concrete tensile strength
+    const double m_ebt2=0.000000015;        //The ultimate concrete tensile strain
     double m_es0=0;                     //Strain at reaching the maximum reinforcement steel tensile strength
     const double m_es2=0.025;           //The ultimate reinforcement steel tensile strain
     QVector<QVector<double>> m_KbElast; //Coefficients of elasticity of concrete elements
     QVector<double> m_KrElast;          //Coefficients of elasticity of reinforcement elements
+    QVector<QVector<double>> m_vEb;     //Current modulus of elasticity of concrete elements
     //stiffness characteristics
     double m_D11=0;
     double m_D22=0;
@@ -73,6 +74,7 @@ public:
     double SigmaS(double);          //Method to calculate stress from strain in reinforcement section
     void setStartKbElast();         //Fill container with coefficients of elasticity of concrete elements with 1s
     void setStartKrElast();         //Fill container with coefficients of elasticity of reinforcement elements with 1s
+    void setStartvEb();             //Fill container with modulus of elasticity of concrete elements with Eb_red
     //Methods to calculate stiffness characteristics
     void setD11();
     void setD22();
