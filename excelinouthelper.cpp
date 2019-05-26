@@ -32,11 +32,11 @@ void ExcelInOutHelper::importPoints(QString fileName, int sheetNumber)
     m_usedRange=m_sheet->querySubObject("UsedRange");
     m_rows=m_usedRange->querySubObject("Rows");
     m_cols=m_usedRange->querySubObject("Columns");
-    QFile file1("D://temp//sheet2.html");
-        file1.open(QIODevice::WriteOnly | QIODevice::Text);
-        QTextStream out(&file1);
-        out << m_sheet->generateDocumentation();
-        file1.close();
+//    QFile file1("D://temp//sheet2.html");
+//        file1.open(QIODevice::WriteOnly | QIODevice::Text);
+//        QTextStream out(&file1);
+//        out << m_sheet->generateDocumentation();
+//        file1.close();
     int firstRow=m_usedRange->property("Row").toInt();
     int firstCol=m_usedRange->property("Column").toInt();
     int nRows=m_rows->property("Count").toInt();

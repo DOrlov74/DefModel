@@ -27,6 +27,7 @@ CONFIG += c++11
 
 SOURCES += \
     excelinouthelper.cpp \
+    infoform.cpp \
         main.cpp \
         mainwindow.cpp \
     scene.cpp \
@@ -36,6 +37,7 @@ SOURCES += \
 
 HEADERS += \
     excelinouthelper.h \
+    infoform.h \
         mainwindow.h \
     scene.h \
     commandwidget.h \
@@ -43,6 +45,7 @@ HEADERS += \
     calculation.h
 
 FORMS += \
+        infoform.ui \
         mainwindow.ui
 
 # Default rules for deployment.

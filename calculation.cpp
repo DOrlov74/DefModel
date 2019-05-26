@@ -3,10 +3,16 @@
 #include <QPointF>
 #include <QVector>
 #include <QtMath>
+#include <QProgressDialog>
 
 Calculation::Calculation(QObject *parent) : QObject(parent)
 {
+   myInfo=new InfoForm();
+}
 
+Calculation::~Calculation()
+{
+    delete myInfo;
 }
 
 void Calculation::setXdivision(uint a)
@@ -220,7 +226,7 @@ void Calculation::setD11()
     {
         for (int j=0; j<m_concreteArea[i].size(); ++j)
         {
-            m_D11+=m_concreteArea[i][j]*qPow(m_concreteCenter[i][j].x(),2)*m_Eb*m_KbElast[i][j];
+            m_D11+=m_concreteArea[i][j]*qPow(m_concreteCenter[i][j].x(),2)*m_Eb_red*m_KbElast[i][j];
         }
     }
     for (int i=0; i<m_reinfArea.size(); ++i)
@@ -236,7 +242,7 @@ void Calculation::setD22()
     {
         for (int j=0; j<m_concreteArea[i].size(); ++j)
         {
-            m_D22+=m_concreteArea[i][j]*qPow(m_concreteCenter[i][j].y(),2)*m_Eb*m_KbElast[i][j];
+            m_D22+=m_concreteArea[i][j]*qPow(m_concreteCenter[i][j].y(),2)*m_Eb_red*m_KbElast[i][j];
         }
     }
     for (int i=0; i<m_reinfArea.size(); ++i)
@@ -252,7 +258,7 @@ void Calculation::setD12()
     {
         for (int j=0; j<m_concreteArea[i].size(); ++j)
         {
-            m_D12+=m_concreteArea[i][j]*m_concreteCenter[i][j].x()*m_concreteCenter[i][j].y()*m_Eb*m_KbElast[i][j];
+            m_D12+=m_concreteArea[i][j]*m_concreteCenter[i][j].x()*m_concreteCenter[i][j].y()*m_Eb_red*m_KbElast[i][j];
         }
     }
     for (int i=0; i<m_reinfArea.size(); ++i)
@@ -268,7 +274,7 @@ void Calculation::setD13()
     {
         for (int j=0; j<m_concreteArea[i].size(); ++j)
         {
-            m_D13+=m_concreteArea[i][j]*m_concreteCenter[i][j].x()*m_Eb*m_KbElast[i][j];
+            m_D13+=m_concreteArea[i][j]*m_concreteCenter[i][j].x()*m_Eb_red*m_KbElast[i][j];
         }
     }
     for (int i=0; i<m_reinfArea.size(); ++i)
@@ -284,7 +290,7 @@ void Calculation::setD23()
     {
         for (int j=0; j<m_concreteArea[i].size(); ++j)
         {
-            m_D23+=m_concreteArea[i][j]*m_concreteCenter[i][j].y()*m_Eb*m_KbElast[i][j];
+            m_D23+=m_concreteArea[i][j]*m_concreteCenter[i][j].y()*m_Eb_red*m_KbElast[i][j];
         }
     }
     for (int i=0; i<m_reinfArea.size(); ++i)
@@ -300,7 +306,7 @@ void Calculation::setD33()
     {
         for (int j=0; j<m_concreteArea[i].size(); ++j)
         {
-            m_D33+=m_concreteArea[i][j]*m_Eb*m_KbElast[i][j];
+            m_D33+=m_concreteArea[i][j]*m_Eb_red*m_KbElast[i][j];
         }
     }
     for (int i=0; i<m_reinfArea.size(); ++i)
@@ -451,13 +457,22 @@ double Calculation::max(double d1, double d2, double d3)
 
 void Calculation::calculate()
 {
+    //QProgressDialog* myInfo= new QProgressDialog("Calculation in progress...","Cancel",0,100);    //Не работает
+    myInfo->setWindowModality(Qt::NonModal);
+    //myInfo->resize(300,200);
+    myInfo->setWindowTitle("Warning");
+    //waitDialog->addButton(QMessageBox::Cancel);
+    //waitDialog->setText("Wait please...");
+    myInfo->show();
     ExcelInOutHelper* myExcel=new ExcelInOutHelper();
     double curAccuracy=0;
     myExcel->saveArea(m_concreteArea, m_reinfArea);
     myExcel->saveCenterDist(m_concreteCenter, m_reinfCenter);
+    myInfo->setValue(10);
     setStartKbElast();
     setStartKrElast();
     setStartvEb();
+    myInfo->setValue(20);
     for (int cur_it=1; cur_it<nIterations; ++cur_it)
     {
         double innerAccuracy=0;
@@ -482,10 +497,13 @@ void Calculation::calculate()
         if (curAccuracy<m_accuracy)
         {break;}
     }
+    myInfo->setValue(80);
     myExcel->saveKElast(m_KbElast, m_KrElast);
     myExcel->savevEb(m_vEb);
     myExcel->saveStrain(m_concreteStrain, m_reinfStrain);
     myExcel->saveStress(m_concreteStress, m_reinfStress);
+    myInfo->setValue(100);
+    myInfo->hide();   //cancel();
 }
 
 void Calculation::slotSetEb(double d)

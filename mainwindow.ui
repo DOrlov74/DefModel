@@ -372,6 +372,9 @@
              </item>
              <item>
               <widget class="QLineEdit" name="NLineEdit">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -430,6 +433,9 @@
              </item>
              <item>
               <widget class="QLineEdit" name="MyLineEdit">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -482,6 +488,9 @@
              </item>
              <item>
               <widget class="QLineEdit" name="MxLineEdit">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>

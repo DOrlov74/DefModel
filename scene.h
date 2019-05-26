@@ -19,6 +19,7 @@ class Scene : public QGraphicsScene
     drawMode m_drawMode=NONE;
     bool m_doneConcretePath=false;
     bool m_doneReinforcement=false;
+    bool m_sectDivided=false;
     QVector<QPointF> m_concretePoints;  //Points of concrete section in GraphicsScene coordinats
     QVector<QVector<QPointF>> m_dividedPoints;   //Points of divided elements in GraphicsScene coordinats
     QVector<QVector<QVector<QPointF>>> m_dividedRegions;   //Points of divided regions in GraphicsScene coordinats
@@ -30,7 +31,8 @@ class Scene : public QGraphicsScene
     QBrush brush;
     uint m_pointSize=5;
     QGraphicsEllipseItem* m_currentItem;
-    QList<QGraphicsItem*> m_pointsItems;    //List to store points of concrete section
+    QList<QGraphicsItem*> m_pointsItems;        //List to store points of concrete section
+    QGraphicsItem* m_pathItem;                  //Pointer to the concrete path item
     QList<QGraphicsRectItem*> m_divisionItems;    //List to store divided rectangles of concrete section
     QList<QGraphicsPathItem*> m_divisionPaths;    //List to store divided paths of concrete section
     QList<QGraphicsEllipseItem*> m_reinfItems;      //List to store reinforcement circles

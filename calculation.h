@@ -2,9 +2,11 @@
 #define CALCULATION_H
 
 #include <QObject>
+#include <QWidget>
 #include <QVector>
 #include <QPointF>
 #include "excelinouthelper.h"
+#include "infoform.h"
 
 class Calculation : public QObject
 {
@@ -56,9 +58,11 @@ class Calculation : public QObject
     QVector<double> m_reinfStrain;                    //Strain of reinforcement elements
     QVector<QVector<double>> m_concreteStress;        //Stress in concrete elements
     QVector<double> m_reinfStress;                    //Stress in reinforcement elements
+    InfoForm* myInfo;
 
 public:
     explicit Calculation(QObject *parent = nullptr);
+    ~Calculation();
     void setXdivision(uint);
     void setYdivision(uint);
     void setConcreteArea(const QVector<QVector<double>>&);
