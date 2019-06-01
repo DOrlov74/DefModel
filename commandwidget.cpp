@@ -42,6 +42,7 @@ void commandWidget::slotAddPoint(QPointF point)
         else if (n_points>1)
         {
             this->append("x: "+QString::number(point.x())+" y: "+QString::number(point.y())+"> enter next point or 'c' to close >");
+            m_drawLineMode=true;
         }
         else
         {
@@ -60,6 +61,7 @@ void commandWidget::slotAddKey(QString str)
     if (str=="c"||str=="C")
     {
         this->append("close>");
+        m_drawLineMode=false;
          n_points=0;
     }
     else if (str=="d"||str=="D")
@@ -92,7 +94,7 @@ void commandWidget::slotGetText()
             m_strPos=this->toPlainText().size();
         }
     }
-    if (m_drawPointMode)
+    if (m_drawPointMode||m_drawLineMode)
     {
         QRegularExpression reg3("[d|c]+\\n", QRegularExpression::CaseInsensitiveOption);
         QRegularExpressionMatch match=reg3.match(m_strCommand);

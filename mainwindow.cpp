@@ -13,12 +13,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    myScene= new Scene();
+    myScene= new Scene(this);
     ui->graphicsView->setScene(myScene);
-    myScene->setSceneRect(0,0,ui->graphicsView->width(),ui->graphicsView->height());
+    //myScene->setSceneRect(0,0,ui->graphicsView->width(),ui->graphicsView->height());
     //qDebug()<<"scene width: "<< ui->graphicsView->width()<<"scene height: "<<ui->graphicsView->height();
     //myScene->setBasePoint(QPointF(10,myScene->height()-10));
-    QDoubleValidator* validator=new QDoubleValidator();
+    QDoubleValidator* validator=new QDoubleValidator(this);
     ui->NLineEdit->setValidator(validator);
     ui->MyLineEdit->setValidator(validator);
     ui->MxLineEdit->setValidator(validator);
@@ -111,11 +111,23 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(this, SIGNAL(signalSetRs(double)),myScene, SLOT(slotSetRs(double)));                                           //send reinforcement tensile strength to my scene
     fillRClasses();                                                                                                                 //fill container with reinforcement classes
     fillRCombobox();                                                                                                                //fill combobox with reinforcement classes
+    QObject::connect(myScene, SIGNAL(signalCalcStart()), this, SLOT(slotCalcStart()));                          //send start calculation signal to mainwindow
+    QObject::connect(myScene, SIGNAL(signalPercentChanged(int)), this, SLOT(slotPercentChanged(int)));          //send porgress percentage to mainwindow
+    QObject::connect(myScene, SIGNAL(signalCalcEnd(bool)), this, SLOT(slotCalcEnd(bool)));                              //send end calculation signal to mainwindow
+    myInfo=new InfoForm();
+    myInfo->setWindowFlag(Qt::WindowStaysOnTopHint);
+    myInfo->setWindowModality(Qt::NonModal);
+    myInfo->setWindowTitle("Calculation result");
+    QObject::connect(myScene, SIGNAL(signalExportStart()), myInfo, SLOT(slotExportStart()));                          //send start export to excel signal to info window
+    QObject::connect(myScene, SIGNAL(signalExportPercentChanged(int)), myInfo, SLOT(slotExportPercentChanged(int)));          //send porgress percentage to info window
+    QObject::connect(myScene, SIGNAL(signalExportEnd()), myInfo, SLOT(slotExportEnd()));                              //send end export to excel signal to info window
+    QObject::connect(myInfo, SIGNAL(signalApplyPressed(int)), myScene, SLOT(slotApplyPressed(int)));
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    //delete myInfo;
 }
 
 void MainWindow::setSceneSize()
@@ -156,12 +168,12 @@ void MainWindow::slotFitView()
 
 void MainWindow::slotZoomIn()
 {
-    ui->graphicsView->scale(1.1,1.1);
+    ui->graphicsView->scale(1.25,1.25);
 }
 
 void MainWindow::slotZoomOut()
 {
-    ui->graphicsView->scale(0.9,0.9);
+    ui->graphicsView->scale(0.8,0.8);
 }
 
 void MainWindow::slotCoordChanged(QPointF point)
@@ -182,6 +194,27 @@ void MainWindow::slotRClassChanged(QString str)
     emit signalSetEs(ui->reinforcementClassComboBox->currentData().value<QPair<double,double>>().first);
     emit signalSetRs(ui->reinforcementClassComboBox->currentData().value<QPair<double,double>>().second);
     qDebug()<<"in slot reinforcement class changed to "<<str;
+}
+
+void MainWindow::slotCalcStart()
+{
+    myProgress= new QProgressDialog("Calculation in progress...","Cancel",0,100,this);
+
+    myProgress->show();
+}
+
+void MainWindow::slotPercentChanged(int i)
+{
+    myProgress->setValue(i);
+}
+
+void MainWindow::slotCalcEnd(bool b)
+{
+    myProgress->hide();
+    if (b)
+    {
+        myInfo->show();
+    }
 }
 
 void MainWindow::fillCClasses()

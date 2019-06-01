@@ -12,6 +12,7 @@ class commandWidget : public QTextEdit
     QString m_strCommand;
     bool m_DivideMode=false;
     bool m_drawPointMode=false;
+    bool m_drawLineMode=false;
     bool m_waitPoint=false;
     bool m_waitX=false;
     bool m_waitY=false;

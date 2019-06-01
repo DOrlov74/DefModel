@@ -5,6 +5,7 @@
 #include "scene.h"
 #include "view.h"
 #include "excelinouthelper.h"
+#include "infoform.h"
 
 namespace Ui {
 class MainWindow;
@@ -16,6 +17,8 @@ class MainWindow : public QMainWindow
     Scene* myScene;
     QMap<QString,QVector<double>> m_cClasses;        //container to store concrete classes with modulus of elasticity and tensile strength
     QMap<QString,QPair<double,double>> m_rClasses;        //container to store reinforcement classes with modulus of elasticity and tensile strength
+    InfoForm* myInfo;
+    QProgressDialog* myProgress;
 
     void fillCClasses();
     void fillCCombobox();
@@ -46,6 +49,9 @@ public slots:
     void slotCoordChanged(QPointF);
     void slotCClassChanged(QString);
     void slotRClassChanged(QString);
+    void slotCalcStart();
+    void slotPercentChanged(int);
+    void slotCalcEnd(bool);
 
 private:
     Ui::MainWindow *ui;

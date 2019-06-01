@@ -13,6 +13,7 @@
 #include <cmath>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QFont>
 
 Scene::Scene(QWidget *parent) : QGraphicsScene(parent)
 {
@@ -29,6 +30,18 @@ Scene::Scene(QWidget *parent) : QGraphicsScene(parent)
     QObject::connect(this, SIGNAL(signalSetRb(double)), myCalc, SLOT(slotSetRb(double)));
     QObject::connect(this, SIGNAL(signalSetRbt(double)), myCalc, SLOT(slotSetRbt(double)));
     QObject::connect(this, SIGNAL(signalSetRs(double)), myCalc, SLOT(slotSetRs(double)));
+    QObject::connect(myCalc, SIGNAL(signalCalcStart()), this, SLOT(slotCalcStart()));
+    QObject::connect(myCalc, SIGNAL(signalPercentChanged(int)), this, SLOT(slotPercentChanged(int)));
+    QObject::connect(myCalc, SIGNAL(signalCalcEnd(bool)), this, SLOT(slotCalcEnd(bool)));
+    QObject::connect(myCalc, SIGNAL(signalDrawStress()), this, SLOT(slotDrawStress()));
+    QObject::connect(myCalc, SIGNAL(signalExportStart()), this, SLOT(slotExportStart()));
+    QObject::connect(myCalc, SIGNAL(signalExportPercentChanged(int)), this, SLOT(slotExportPercentChanged(int)));
+    QObject::connect(myCalc, SIGNAL(signalExportEnd()), this, SLOT(slotExportEnd()));
+}
+
+Scene::~Scene()
+{
+    delete m_concretePath;
 }
 
 Scene::drawMode Scene::getDrawMode()
@@ -72,21 +85,20 @@ void Scene::slotCalculate()
 {
     if ((!m_doneReinforcement)||(!m_doneConcretePath)||(!m_sectDivided))
     {
-        QMessageBox* msgBox= new QMessageBox();
-        msgBox->setWindowTitle("Warning");
+        QString message;
         if (!m_doneReinforcement)
         {
-            msgBox->setText("Draw Reinforcement first");
+            message="Draw Reinforcement first";
         }
         else if (!m_doneConcretePath)
         {
-            msgBox->setText("Draw Concrete section first");
+            message="Draw Concrete section first";
         }
         else
         {
-            msgBox->setText("Divide Concrete section first");
+            message="Divide Concrete section first";
         }
-        msgBox->exec();
+        QMessageBox::warning(nullptr,"Warning",message);
     }
     else
     {
@@ -141,10 +153,13 @@ void Scene::slotCalculate()
                 {
                     JxIsSet=false;
                     iSize=m_dividedRegions[i][j].size();
-                    for (int k=0; k<iSize-1;++k)
+                    for (int k=0; k<iSize;++k)
                     {
-                        dSum1+=m_dividedRegions[i][j][k].x()*m_dividedRegions[i][j][k+1].y();
-                        dSum2+=m_dividedRegions[i][j][k+1].x()*m_dividedRegions[i][j][k].y();
+                        if (k!=iSize-1)
+                        {
+                            dSum1+=m_dividedRegions[i][j][k].x()*m_dividedRegions[i][j][k+1].y();
+                            dSum2+=m_dividedRegions[i][j][k+1].x()*m_dividedRegions[i][j][k].y();
+                        }
                         dSumX+=m_dividedRegions[i][j][k].x();
                         dSumY+=m_dividedRegions[i][j][k].y();
                         if (m_dividedRegions[i][j][k].x()<dXmin)
@@ -153,7 +168,7 @@ void Scene::slotCalculate()
                         {dXmax=m_dividedRegions[i][j][k].x();}
                         if (m_dividedRegions[i][j][k].y()<dYmin)
                         {dYmin=m_dividedRegions[i][j][k].y();}
-                        if (m_dividedRegions[i][j][k].x()>dYmax)
+                        if (m_dividedRegions[i][j][k].y()>dYmax)
                         {dYmax=m_dividedRegions[i][j][k].y();}
                     }
                     if (iSize!=0)
@@ -1025,7 +1040,7 @@ void Scene::slotSetRs(double d)
 
 void Scene::slotImportPoints()
 {
-    ExcelInOutHelper* myExcel=new ExcelInOutHelper();
+    myExcel=new ExcelInOutHelper(this);
     myExcel->importPoints(QFileDialog::getOpenFileName(nullptr, "Open file with data", "data.xls", "excel(*.xls *.xlsx)"));
     setDrawLine();
     for (int i=0; i<myExcel->getConcreteData().size(); ++i)
@@ -1046,7 +1061,7 @@ void Scene::slotImportPoints()
 
 void Scene::slotExportPoints()
 {
-    ExcelInOutHelper* myExcel=new ExcelInOutHelper();
+    myExcel=new ExcelInOutHelper(this);
 //    QString fileName=QFileDialog::getSaveFileName(this, "Save file with data", "data.xls", "excel(*.xls *.xlsx)");
 //    qDebug()<<fileName;
     if (m_doneConcretePath&&m_doneReinforcement)
@@ -1055,17 +1070,156 @@ void Scene::slotExportPoints()
     }
     else
     {
-       QMessageBox* msgBox= new QMessageBox();
-       msgBox->setWindowTitle("Warning");
        if (m_doneConcretePath)
        {
-           msgBox->setText("Draw Reinforcement first");
+           int msgBox=QMessageBox::warning(nullptr,"Warning","Draw Reinforcement first");
        }
        else
        {
-           msgBox->setText("Draw Concrete section first");
+           int msgBox=QMessageBox::warning(nullptr,"Warning","Draw Concrete section first");
        }
-       msgBox->exec();
+    }
+}
+
+void Scene::slotCalcStart()
+{
+    emit signalCalcStart();
+}
+
+void Scene::slotPercentChanged(int i)
+{
+    emit signalPercentChanged(i);
+}
+
+void Scene::slotCalcEnd(bool b)
+{
+    emit signalCalcEnd(b);
+}
+
+void Scene::slotDrawStress()
+{
+    QString outputTitle="Stress in MPa";
+    QFont titleFont=QFont("Helvetica", 20, QFont::Normal);
+    m_resultTitle=this->addSimpleText(outputTitle, titleFont);
+    m_resultTitle->setPos(lowX+m_recWidth/2-100,lowY-40);
+    m_concreteResultText.fill(QVector<QGraphicsSimpleTextItem*>(),nXdivisions);
+    for (int i=0; i<m_concreteCenter.size(); ++i)
+    {
+        m_concreteResultText[i].fill(nullptr,nYdivisions);
+        for (int j=0; j<m_concreteCenter[i].size(); ++j)
+        {
+            m_concreteResultText[i][j]=this->addSimpleText(QString::number(myCalc->getCStress()[i][j]/1000,'f',1));
+            m_concreteResultText[i][j]->setPos(m_concreteCenter[i][j]);
+            if (m_isRect)
+            {
+                m_divisionItems[i][j]->setZValue(-1);
+                m_divisionItems[i][j]->setBrush(myCalc->getCStress()[i][j]==0?bTensile:bCompressed);
+
+            }
+            else
+            {
+                m_divisionPaths[i][j]->setZValue(-1);
+                m_divisionPaths[i][j]->setBrush(myCalc->getCStress()[i][j]==0?bTensile:bCompressed);
+
+            }
+        }
+    }
+    m_reinfResultText.fill(nullptr,m_reinfCircles.size());
+    for (int i=0;i<m_reinfCircles.size(); ++i)
+    {
+        m_reinfResultText[i]=this->addSimpleText(QString::number(myCalc->getRStress()[i]/1000,'f',1));
+        m_reinfResultText[i]->setPos(m_reinfCircles[i].second);
+    }
+}
+
+void Scene::DrawStrain()
+{
+    QString outputTitle="Strain x1000";
+    QFont titleFont=QFont("Helvetica", 20, QFont::Normal);
+    this->removeItem(m_resultTitle);
+    m_resultTitle=this->addSimpleText(outputTitle, titleFont);
+    m_resultTitle->setPos(lowX+m_recWidth/2-100,lowY-40);
+    for (int i=0; i<m_concreteCenter.size(); ++i)
+    {
+        for (int j=0; j<m_concreteCenter[i].size(); ++j)
+        {
+            this->removeItem(m_concreteResultText[i][j]);
+            m_concreteResultText[i][j]=this->addSimpleText(QString::number(myCalc->getCStrain()[i][j]*1000,'f',4));
+            m_concreteResultText[i][j]->setPos(m_concreteCenter[i][j]);
+        }
+    }
+    for (int i=0;i<m_reinfCircles.size(); ++i)
+    {
+        this->removeItem(m_reinfResultText[i]);
+        m_reinfResultText[i]=this->addSimpleText(QString::number(myCalc->getRStrain()[i]*1000,'f',4));
+        m_reinfResultText[i]->setPos(m_reinfCircles[i].second);
+    }
+}
+
+void Scene::DrawArea()
+{
+    QString outputTitle="Area in sm2";
+    QFont titleFont=QFont("Helvetica", 20, QFont::Normal);
+    this->removeItem(m_resultTitle);
+    m_resultTitle=this->addSimpleText(outputTitle, titleFont);
+    m_resultTitle->setPos(lowX+m_recWidth/2-100,lowY-40);
+    for (int i=0; i<m_concreteCenter.size(); ++i)
+    {
+        for (int j=0; j<m_concreteCenter[i].size(); ++j)
+        {
+            this->removeItem(m_concreteResultText[i][j]);
+            m_concreteResultText[i][j]=this->addSimpleText(QString::number(myCalc->getCArea()[i][j]*10000,'f',1));
+            m_concreteResultText[i][j]->setPos(m_concreteCenter[i][j]);
+        }
+    }
+    for (int i=0;i<m_reinfCircles.size(); ++i)
+    {
+        this->removeItem(m_reinfResultText[i]);
+        m_reinfResultText[i]=this->addSimpleText(QString::number(myCalc->getRArea()[i]*10000,'f',1));
+        m_reinfResultText[i]->setPos(m_reinfCircles[i].second);
+    }
+}
+
+void Scene::slotExportStart()
+{
+    emit signalExportStart();
+}
+
+void Scene::slotExportPercentChanged(int i)
+{
+    emit signalExportPercentChanged(i);
+}
+
+void Scene::slotExportEnd()
+{
+    emit signalExportEnd();
+}
+
+void Scene::slotApplyPressed(int i)
+{
+    if (!m_resultIsSaved)
+    {
+        myCalc->saveResult();
+        m_resultIsSaved=true;
+    }
+    if(i!=m_resultMode)
+    {
+        m_resultMode=i;
+        switch (i)
+        {
+        case 1:
+            DrawStress();
+            break;
+        case 2:
+            DrawStress();
+            break;
+        case 3:
+            DrawStrain();
+            break;
+        case 4:
+            DrawArea();
+            break;
+        }
     }
 }
 
@@ -1153,6 +1307,7 @@ void Scene::slotGetCommand(QString str)
                 this->removeItem(m_pathItem);
             }
             m_pathItem=this->addPath(*m_concretePath, pen, QBrush(QColor(0,180,220,100)));
+            m_pathItem->setZValue(-2);
             emit signalDrawMode(false);
             emit signalSectDone(true);
             getSectSizes();
@@ -1527,6 +1682,41 @@ void Scene::switchPoint(QPointF& p1, QPointF& p2)
     p2.setY(temp.y());
 }
 
+void Scene::DrawStress()
+{
+    QString outputTitle;
+    if (m_resultMode==1)
+    {
+        outputTitle="Stress in MPa";
+    }
+    else
+    {
+        outputTitle="Stress in kg/sm2";
+    }
+    QFont titleFont=QFont("Helvetica", 20, QFont::Normal);
+    this->removeItem(m_resultTitle);
+    m_resultTitle=this->addSimpleText(outputTitle, titleFont);
+    m_resultTitle->setPos(lowX+m_recWidth/2-100,lowY-40);
+    QString outValue;
+    for (int i=0; i<m_concreteCenter.size(); ++i)
+    {
+        for (int j=0; j<m_concreteCenter[i].size(); ++j)
+        {
+            this->removeItem(m_concreteResultText[i][j]);
+            m_resultMode==1?outValue=QString::number(myCalc->getCStress()[i][j]/1000,'f',1):outValue=QString::number(myCalc->getCStress()[i][j]/98,'f',1);
+            m_concreteResultText[i][j]=this->addSimpleText(outValue);
+            m_concreteResultText[i][j]->setPos(m_concreteCenter[i][j]);
+        }
+    }
+    for (int i=0;i<m_reinfCircles.size(); ++i)
+    {
+        this->removeItem(m_reinfResultText[i]);
+        m_resultMode==1?outValue=QString::number(myCalc->getRStress()[i]/1000,'f',1):outValue=QString::number(myCalc->getRStress()[i]/98,'f',1);
+        m_reinfResultText[i]=this->addSimpleText(outValue);
+        m_reinfResultText[i]->setPos(m_reinfCircles[i].second);
+    }
+}
+
 void Scene::slotNewSection()
 {
     qDebug()<<"in new section method";
@@ -1537,11 +1727,35 @@ void Scene::slotNewSection()
     ++i;
     }
     m_concretePoints.erase(m_concretePoints.begin(),m_concretePoints.end());
+    m_dividedPoints.erase(m_dividedPoints.begin(),m_dividedPoints.end());
+    m_dividedRegions.erase(m_dividedRegions.begin(),m_dividedRegions.end());
+    m_dividedFaces.erase(m_dividedFaces.begin(),m_dividedFaces.end());
+    m_reinfCircles.erase(m_reinfCircles.begin(),m_reinfCircles.end());
     m_doneConcretePath=false;
+    m_doneReinforcement=false;
+    m_sectDivided=false;
     delete m_concretePath;
     m_concretePath=new QPainterPath();
     m_pathItem=nullptr;
+    delete m_currentItem;
+    m_pointsItems.erase(m_pointsItems.begin(),m_pointsItems.end());
+    m_divisionItems.erase(m_divisionItems.begin(),m_divisionItems.end());
+    m_divisionPaths.erase(m_divisionPaths.begin(),m_divisionPaths.end());
+    m_reinfItems.erase(m_reinfItems.begin(),m_reinfItems.end());
+    m_concreteArea.erase(m_concreteArea.begin(),m_concreteArea.end());
+    m_concreteJx.erase(m_concreteJx.begin(),m_concreteJx.end());
+    m_concreteJy.erase(m_concreteJy.begin(),m_concreteJy.end());
+    m_concreteCenter.erase(m_concreteCenter.begin(),m_concreteCenter.end());
+    m_concreteResultText.erase(m_concreteResultText.begin(),m_concreteResultText.end());
+    m_reinfResultText.erase(m_reinfResultText.begin(),m_reinfResultText.end());
+    m_recWidth=0;
+    m_recHeight=0;
+    lowX=0;
+    highX=0;
+    lowY=0;
+    highY=0;
     emit signalSceneCleared(true);
+    emit signalReinfCleared(true);
 }
 
 void Scene::slotDivideX(uint num)
@@ -1628,6 +1842,7 @@ void Scene::drawPoint(const QPointF& point)
                 this->removeItem(m_pathItem);
             }
             m_pathItem=this->addPath(*m_concretePath, pen, QBrush(QColor(0,180,220,100)));
+            m_pathItem->setZValue(-2);
         }
     }
     if (m_drawMode!=NONE)
@@ -1681,20 +1896,24 @@ void Scene::drawDivisions()
     brush.setColor(Qt::yellow); //не работает
     if (m_isRect)       //simple rectangle
     {
+        m_divisionItems.fill(QVector<QGraphicsRectItem*>(),nXdivisions);
         for (int i=1; i<=nXdivisions; ++i)
         {
+            m_divisionItems[i].fill(nullptr,nYdivisions);
             for (int j=1; j<=nYdivisions; ++j)
             {
                 QRectF r=QRectF(m_dividedPoints[i-1][j-1].x(),m_dividedPoints[i-1][j-1].y(),(m_dividedPoints[i][j].x()-m_dividedPoints[i-1][j].x()),(m_dividedPoints[i][j].y()-m_dividedPoints[i][j-1].y()));
-                m_divisionItems.append(this->addRect(r,pen,brush));
+                m_divisionItems[i][j]=this->addRect(r,pen,brush);
                 qDebug()<<"x:"+QString::number(m_dividedPoints[i][j].x())+" y:"+ QString::number(m_dividedPoints[i][j].y());
             }
         }
     }
     else                //draw custom polygon
     {
+        m_divisionPaths.fill(QVector<QGraphicsPathItem*>(),nXdivisions);
         for (int i=0; i<nXdivisions; ++i)
         {
+            m_divisionPaths[i].fill(nullptr,nYdivisions);
             for (int j=0; j<nYdivisions; ++j)
             {
                 if (m_dividedRegions[i][j].size()!=0)
@@ -1708,7 +1927,7 @@ void Scene::drawDivisions()
                         qDebug()<<"Point added at x:"<<QString::number(m_dividedRegions[i][j][n].x())<<" y:"+QString::number(m_dividedRegions[i][j][n].y());
                     }
                     p.lineTo(m_dividedRegions[i][j][0]);
-                    m_divisionPaths.append(this->addPath(p,pen,brush));
+                    m_divisionPaths[i][j]=this->addPath(p,pen,brush);
                 }
             }
         }

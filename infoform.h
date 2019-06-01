@@ -12,11 +12,25 @@ class InfoForm : public QWidget
 {
     Q_OBJECT
 
+    int m_resultMode=1;
+
+signals:
+    void signalApplyPressed(int);
 
 public:
     explicit InfoForm(QWidget *parent = nullptr);
     ~InfoForm();
-    void setValue(int);
+//    void setValue(int);
+
+public slots:
+    void slotExportStart();
+    void slotExportPercentChanged(int);
+    void slotExportEnd();
+    void slotApplyPressed();
+    void slotStressMPaSelected();
+    void slotStressKg_sm2Selected();
+    void slotStrainSelected();
+    void slotAreaSelected();
 
 private:
     Ui::InfoForm *ui;

@@ -53,12 +53,16 @@ class Calculation : public QObject
     double m_1ry=0;             //Curvature of the element in Y axis plane
     double m_e0=0;              //strain of the center point of the element
     double m_accuracy=0.001;    //accuracy of solution
-    int nIterations=10;            //number of iterations
+    int nIterations=50;            //number of iterations
     QVector<QVector<double>> m_concreteStrain;        //Strain of concrete elements
     QVector<double> m_reinfStrain;                    //Strain of reinforcement elements
     QVector<QVector<double>> m_concreteStress;        //Stress in concrete elements
     QVector<double> m_reinfStress;                    //Stress in reinforcement elements
-    InfoForm* myInfo;
+    double m_MinCStrain=0;                  //minimum concrete strain
+    double m_MaxCStrain=0;                  //maximum concrete strain
+    double m_MaxRStrain=0;                  //maximum reinforcement strain
+    bool m_calcIsSuccessful=false;          //flag to store if the calculation is successful
+    //InfoForm* myInfo;
 
 public:
     explicit Calculation(QObject *parent = nullptr);
@@ -93,8 +97,25 @@ public:
     void setKElast();                   //Calculate coefficients of elasticity of concrete and reinforcement elements based on current strain and stress
     double max(double,double,double);   //find maximum of three double numbers
     void calculate();                   //The main method to calculate section
+    void setMaxCStrain();               //Find maximum and minimum concrete strain
+    void setMaxRStrain();               //Find maximum or minimum reinforcement strain
+    bool checkStrain();                 //Check if the maximum strain is less than the ultimate strain
+    const QVector<QVector<double>>& getCStress();
+    const QVector<double>& getRStress();
+    const QVector<QVector<double>>& getCStrain();
+    const QVector<double>& getRStrain();
+    const QVector<QVector<double>>& getCArea();
+    const QVector<double>& getRArea();
+    bool saveResult();
 
 signals:
+    void signalCalcStart();
+    void signalPercentChanged(int);
+    void signalCalcEnd(bool);
+    void signalDrawStress();
+    void signalExportStart();
+    void signalExportPercentChanged(int);
+    void signalExportEnd();
 
 public slots:
     void slotSetEb(double);

@@ -4,15 +4,121 @@
 #include <QVector>
 #include <QtMath>
 #include <QProgressDialog>
+#include <QMessageBox>
+
+void Calculation::setMaxCStrain()
+{
+    for (int i=0; i<m_concreteStrain.size(); ++i)
+    {
+        for (int j=0; j<m_concreteStrain[i].size(); ++j)
+        {
+            if ((i==0)||(i==m_concreteStrain.size()-1)||(j==0)||(j==m_concreteStrain[i].size()-1))
+            {
+                if (m_concreteStrain[i][j]>m_MaxCStrain)
+                {m_MaxCStrain=m_concreteStrain[i][j];}
+                if (m_concreteStrain[i][j]<m_MinCStrain)
+                {m_MinCStrain=m_concreteStrain[i][j];}
+            }
+        }
+    }
+}
+
+void Calculation::setMaxRStrain()
+{
+    for (int i=0; i<m_reinfStrain.size(); ++i)
+    {
+        if (qAbs(m_reinfStrain[i])>m_MaxRStrain)
+        {m_MaxRStrain=qAbs(m_reinfStrain[i]);}
+    }
+}
+
+bool Calculation::checkStrain()
+{
+    QString resultString;
+    if (m_MaxCStrain>m_ebt2)
+    {
+        resultString="Strain in concrete section "+ QString::number(m_MaxCStrain)+ " is bigger than the ultimate tensile strain "+QString::number(m_ebt2)+ ". Try to increase concrete or reinforcement section";
+    }
+    if (m_MinCStrain<(-m_eb2))
+    {
+        resultString="Strain in concrete section "+ QString::number(m_MaxCStrain)+ " is bigger than the ultimate compressive strain "+QString::number(-m_eb2)+ ". Try to increase concrete or reinforcement section";
+    }
+    if (m_MaxRStrain>m_es2)
+    {
+        resultString="Strain in reinforcement section "+ QString::number(m_MaxCStrain)+ " is bigger than the ultimate compressive strain "+QString::number(m_es2)+ ". Try to increase concrete or reinforcement section";
+    }
+    else
+    {
+        resultString="Calculation is finished successfiully";
+        m_calcIsSuccessful=true;
+        return true;
+    }
+    QMessageBox::information(nullptr,"Calculation result",resultString);
+    return false;
+}
+
+const QVector<QVector<double> > &Calculation::getCStress()
+{
+    return m_concreteStress;
+}
+
+const QVector<double> &Calculation::getRStress()
+{
+    return m_reinfStress;
+}
+
+const QVector<QVector<double> > &Calculation::getCStrain()
+{
+    return m_concreteStrain;
+}
+
+const QVector<double> &Calculation::getRStrain()
+{
+    return m_reinfStrain;
+}
+
+const QVector<QVector<double> > &Calculation::getCArea()
+{
+    return m_concreteArea;
+}
+
+const QVector<double> &Calculation::getRArea()
+{
+    return m_reinfArea;
+}
+
+bool Calculation::saveResult()
+{
+    emit signalExportStart();
+    emit signalExportPercentChanged(10);
+    ExcelInOutHelper* myExcel=new ExcelInOutHelper(this);
+    myExcel->saveArea(m_concreteArea, m_reinfArea);
+    emit signalExportPercentChanged(30);
+    myExcel->saveCenterDist(m_concreteCenter, m_reinfCenter);
+    emit signalExportPercentChanged(40);
+    myExcel->saveArea(m_concreteArea, m_reinfArea);
+    emit signalExportPercentChanged(50);
+    myExcel->saveCenterDist(m_concreteCenter, m_reinfCenter);
+    emit signalExportPercentChanged(60);
+    myExcel->saveKElast(m_KbElast, m_KrElast);
+    emit signalExportPercentChanged(70);
+    myExcel->savevEb(m_vEb);
+    emit signalExportPercentChanged(80);
+    myExcel->saveStrain(m_concreteStrain, m_reinfStrain);
+    emit signalExportPercentChanged(90);
+    myExcel->saveStress(m_concreteStress, m_reinfStress);
+    emit signalExportPercentChanged(100);
+    emit signalExportEnd();
+}
 
 Calculation::Calculation(QObject *parent) : QObject(parent)
 {
-   myInfo=new InfoForm();
+   //myInfo=new InfoForm();
 }
 
 Calculation::~Calculation()
 {
-    delete myInfo;
+    //delete myInfo;
 }
 
 void Calculation::setXdivision(uint a)
@@ -458,22 +564,21 @@ double Calculation::max(double d1, double d2, double d3)
 void Calculation::calculate()
 {
     //QProgressDialog* myInfo= new QProgressDialog("Calculation in progress...","Cancel",0,100);    //Не работает
-    myInfo->setWindowModality(Qt::NonModal);
+    //myInfo->setWindowModality(Qt::NonModal);
     //myInfo->resize(300,200);
-    myInfo->setWindowTitle("Warning");
+    //myInfo->setWindowTitle("Warning");
     //waitDialog->addButton(QMessageBox::Cancel);
     //waitDialog->setText("Wait please...");
-    myInfo->show();
-    ExcelInOutHelper* myExcel=new ExcelInOutHelper();
+    //myInfo->show();
+    emit signalCalcStart();
     double curAccuracy=0;
-    myExcel->saveArea(m_concreteArea, m_reinfArea);
-    myExcel->saveCenterDist(m_concreteCenter, m_reinfCenter);
-    myInfo->setValue(10);
+    int cur_it;
+    emit signalPercentChanged(10);
     setStartKbElast();
     setStartKrElast();
     setStartvEb();
-    myInfo->setValue(20);
-    for (int cur_it=1; cur_it<nIterations; ++cur_it)
+    emit signalPercentChanged(20);
+    for (cur_it=1; cur_it<=nIterations; ++cur_it)
     {
         double innerAccuracy=0;
         setD11();
@@ -482,7 +587,7 @@ void Calculation::calculate()
         setD13();
         setD23();
         setD33();
-        for (int innerIt=1; innerIt<nIterations; ++innerIt)
+        for (int innerIt=1; innerIt<=nIterations; ++innerIt)
         {
             innerAccuracy=findCurv();
             qDebug()<<"iteration:"<<innerIt<<" accuracy in curvature:"<<innerAccuracy;
@@ -497,13 +602,25 @@ void Calculation::calculate()
         if (curAccuracy<m_accuracy)
         {break;}
     }
-    myInfo->setValue(80);
-    myExcel->saveKElast(m_KbElast, m_KrElast);
-    myExcel->savevEb(m_vEb);
-    myExcel->saveStrain(m_concreteStrain, m_reinfStrain);
-    myExcel->saveStress(m_concreteStress, m_reinfStress);
-    myInfo->setValue(100);
-    myInfo->hide();   //cancel();
+    emit signalPercentChanged(80);
+    if (cur_it>nIterations)
+    {
+        if (curAccuracy>m_accuracy)
+        {
+            QString resultString="Could not reach target accurancy. Try to increase concrete or reinforcement section";
+            QMessageBox::information(nullptr,"Calculation result",resultString);
+            return;
+        }
+    }
+      setMaxCStrain();
+      setMaxRStrain();
+      checkStrain();
+      if (m_calcIsSuccessful)
+      {
+          emit signalDrawStress();
+      }
+      emit signalPercentChanged(100);
+      emit signalCalcEnd(m_calcIsSuccessful);   //cancel();
 }
 
 void Calculation::slotSetEb(double d)

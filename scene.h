@@ -8,12 +8,14 @@
 #include <QGraphicsItemGroup>
 #include <QAbstractGraphicsShapeItem>
 #include "excelinouthelper.h"
+#include "infoform.h"
 
 class Scene : public QGraphicsScene
 {
     Q_OBJECT
 
     Calculation* myCalc;
+    ExcelInOutHelper* myExcel;
     int idTimer;
     enum drawMode{NONE, LINE, RECT, POINT};
     drawMode m_drawMode=NONE;
@@ -29,17 +31,22 @@ class Scene : public QGraphicsScene
     uint m_currDiam=10;                    //current reinforcement diameter
     QPen pen;
     QBrush brush;
+    QBrush bCompressed=QBrush(QColor(40,60,80),Qt::BDiagPattern);           //Brush to draw compressed concrete
+    QBrush bTensile=QBrush(QColor(220,240,255),Qt::SolidPattern);           //Brush to draw tensile concrete
     uint m_pointSize=5;
     QGraphicsEllipseItem* m_currentItem;
     QList<QGraphicsItem*> m_pointsItems;        //List to store points of concrete section
     QGraphicsItem* m_pathItem;                  //Pointer to the concrete path item
-    QList<QGraphicsRectItem*> m_divisionItems;    //List to store divided rectangles of concrete section
-    QList<QGraphicsPathItem*> m_divisionPaths;    //List to store divided paths of concrete section
+    QVector<QVector<QGraphicsRectItem*>> m_divisionItems;    //Container to store divided rectangles of concrete section
+    QVector<QVector<QGraphicsPathItem*>> m_divisionPaths;    //Container to store divided paths of concrete section
     QList<QGraphicsEllipseItem*> m_reinfItems;      //List to store reinforcement circles
     QVector<QVector<double>> m_concreteArea;        //Areas of the divided elements
     QVector<QVector<double>> m_concreteJx;          //Moments of inertia about X axis of the divided elements
     QVector<QVector<double>> m_concreteJy;          //Moments of inertia about Y axis of the divided elements
     QVector<QVector<QPointF>> m_concreteCenter;     //Point in center of the divided elements
+    QVector<QVector<QGraphicsSimpleTextItem*>> m_concreteResultText;    //Container to store text result of concrete elements
+    QVector<QGraphicsSimpleTextItem*> m_reinfResultText;      //Container to store text result of reinforcement bars
+    QGraphicsSimpleTextItem* m_resultTitle;                     //Pointer to the result title text
     //QGraphicsItemGroup* m_pointsGroup;
     QPointF m_basePoint;                    //Point to transform coordinats for display
     double m_recWidth;      //Actual size of concrete section
@@ -56,6 +63,8 @@ class Scene : public QGraphicsScene
     bool m_NIsSet=false;
     bool m_MxIsSet=false;
     bool m_MyIsSet=false;
+    bool m_resultIsSaved=false;
+    int m_resultMode=1;             //flag to store output type
 
     QPointF toSceneCoord(const QPointF&);   //Transform coordinats methods
     QPointF fromSceneCoord(const QPointF&);
@@ -66,9 +75,13 @@ class Scene : public QGraphicsScene
     void Divide();
     void checkForces();
     void switchPoint(QPointF&, QPointF&);
+    void DrawStress();
+    void DrawStrain();
+    void DrawArea();
 
 public:
     explicit Scene(QWidget *parent = nullptr);
+    ~Scene();
     drawMode getDrawMode();
     void setBasePoint(QPointF);
     int getCurrDiam();
@@ -92,6 +105,12 @@ signals:
     void signalSetRb(double);
     void signalSetRbt(double);
     void signalSetRs(double);
+    void signalCalcStart();
+    void signalPercentChanged(int);
+    void signalCalcEnd(bool);
+    void signalExportStart();
+    void signalExportPercentChanged(int);
+    void signalExportEnd();
 
 public slots:
     void setDrawLine();
@@ -116,6 +135,14 @@ public slots:
     void slotSetRs(double);
     void slotImportPoints();
     void slotExportPoints();
+    void slotCalcStart();
+    void slotPercentChanged(int);
+    void slotCalcEnd(bool);
+    void slotDrawStress();
+    void slotExportStart();
+    void slotExportPercentChanged(int);
+    void slotExportEnd();
+    void slotApplyPressed(int);
 
     // QGraphicsScene interface
 protected:
