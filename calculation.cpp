@@ -227,7 +227,7 @@ void Calculation::setN(double d)
 
 void Calculation::setMx(double d)
 {
-    m_Mx=d;
+    m_Mx=-d;
 }
 
 void Calculation::setMy(double d)
@@ -599,7 +599,7 @@ void Calculation::calculate()
         setKElast();
         curAccuracy=checkForces();
         qDebug()<<"iteration:"<<cur_it<<" accuracy in equilibrium equation:"<<curAccuracy;
-        if (curAccuracy<m_accuracy)
+        if (curAccuracy*100<m_accuracy)
         {break;}
     }
     emit signalPercentChanged(80);

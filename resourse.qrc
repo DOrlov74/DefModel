@@ -5,5 +5,8 @@
         <file>Icon/zoom_out1.ico</file>
         <file>Icon/hand.ico</file>
         <file>data.xls</file>
+        <file>Icon/toExcel2.ico</file>
+        <file>Icon/toExcel3.ico</file>
+        <file>Icon/fromExcel3.ico</file>
     </qresource>
 </RCC>

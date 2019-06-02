@@ -13,9 +13,11 @@ class InfoForm : public QWidget
     Q_OBJECT
 
     int m_resultMode=1;
+    bool m_saveToExcel=false;
 
 signals:
     void signalApplyPressed(int);
+    void signalSaveToExcel(bool);
 
 public:
     explicit InfoForm(QWidget *parent = nullptr);
@@ -31,6 +33,7 @@ public slots:
     void slotStressKg_sm2Selected();
     void slotStrainSelected();
     void slotAreaSelected();
+    void slotSaveToExcel(bool);
 
 private:
     Ui::InfoForm *ui;

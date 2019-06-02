@@ -31,8 +31,8 @@ class Scene : public QGraphicsScene
     uint m_currDiam=10;                    //current reinforcement diameter
     QPen pen;
     QBrush brush;
-    QBrush bCompressed=QBrush(QColor(40,60,80),Qt::BDiagPattern);           //Brush to draw compressed concrete
-    QBrush bTensile=QBrush(QColor(220,240,255),Qt::SolidPattern);           //Brush to draw tensile concrete
+    QBrush bCompressed=QBrush(QColor(0,180,220),Qt::SolidPattern);           //Brush to draw compressed concrete
+    QBrush bTensile=QBrush(QColor(200,240,255),Qt::SolidPattern);           //Brush to draw tensile concrete
     uint m_pointSize=5;
     QGraphicsEllipseItem* m_currentItem;
     QList<QGraphicsItem*> m_pointsItems;        //List to store points of concrete section
@@ -65,6 +65,8 @@ class Scene : public QGraphicsScene
     bool m_MyIsSet=false;
     bool m_resultIsSaved=false;
     int m_resultMode=1;             //flag to store output type
+    bool m_saveToExcel=false;       //flag to store option to save result to excel
+    bool m_calcIsSuccessful=false;          //flag to store if the calculation is successful
 
     QPointF toSceneCoord(const QPointF&);   //Transform coordinats methods
     QPointF fromSceneCoord(const QPointF&);
@@ -78,6 +80,7 @@ class Scene : public QGraphicsScene
     void DrawStress();
     void DrawStrain();
     void DrawArea();
+    void clearResult();
 
 public:
     explicit Scene(QWidget *parent = nullptr);
@@ -143,6 +146,7 @@ public slots:
     void slotExportPercentChanged(int);
     void slotExportEnd();
     void slotApplyPressed(int);
+    void slotSaveToExcel(bool);
 
     // QGraphicsScene interface
 protected:

@@ -17,6 +17,7 @@ InfoForm::InfoForm(QWidget *parent) :
     QObject::connect(ui->stressKg_sm2Button, SIGNAL(toggled(bool)), this, SLOT(slotStressKg_sm2Selected()));
     QObject::connect(ui->strainButton, SIGNAL(toggled(bool)), this, SLOT(slotStrainSelected()));
     QObject::connect(ui->areaButton, SIGNAL(toggled(bool)), this, SLOT(slotAreaSelected()));
+    QObject::connect(ui->saveCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotSaveToExcel(bool)));
 }
 
 InfoForm::~InfoForm()
@@ -72,4 +73,11 @@ void InfoForm::slotAreaSelected()
 {
     m_resultMode=4;
     ui->applyButton->setEnabled(true);
+}
+
+void InfoForm::slotSaveToExcel(bool b)
+{
+    m_saveToExcel=b;
+    ui->applyButton->setEnabled(true);
+    emit signalSaveToExcel(b);
 }

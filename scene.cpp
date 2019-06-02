@@ -103,6 +103,7 @@ void Scene::slotCalculate()
     else
     {
         qDebug()<<"in Calculate Slot";
+        clearResult();
         myCalc->setXdivision(nXdivisions);
         myCalc->setYdivision(nYdivisions);
         m_concreteArea.fill(QVector<double>(),nXdivisions);
@@ -1094,6 +1095,7 @@ void Scene::slotPercentChanged(int i)
 void Scene::slotCalcEnd(bool b)
 {
     emit signalCalcEnd(b);
+    m_calcIsSuccessful=b;
 }
 
 void Scene::slotDrawStress()
@@ -1180,6 +1182,29 @@ void Scene::DrawArea()
     }
 }
 
+void Scene::clearResult()
+{
+    if(m_calcIsSuccessful)
+    {
+        this->removeItem(m_resultTitle);
+        m_resultTitle=nullptr;
+        for (int i=0; i<m_concreteCenter.size(); ++i)
+        {
+            for (int j=0; j<m_concreteCenter[i].size(); ++j)
+            {
+                this->removeItem(m_concreteResultText[i][j]);
+                m_concreteResultText[i][j]=nullptr;
+            }
+        }
+        for (int i=0;i<m_reinfCircles.size(); ++i)
+        {
+            this->removeItem(m_reinfResultText[i]);
+            m_reinfResultText[i]=nullptr;
+        }
+        m_calcIsSuccessful=false;
+    }
+}
+
 void Scene::slotExportStart()
 {
     emit signalExportStart();
@@ -1197,7 +1222,7 @@ void Scene::slotExportEnd()
 
 void Scene::slotApplyPressed(int i)
 {
-    if (!m_resultIsSaved)
+    if (!m_resultIsSaved&&m_saveToExcel)
     {
         myCalc->saveResult();
         m_resultIsSaved=true;
@@ -1221,6 +1246,11 @@ void Scene::slotApplyPressed(int i)
             break;
         }
     }
+}
+
+void Scene::slotSaveToExcel(bool b)
+{
+    m_saveToExcel=b;
 }
 
 void Scene::setDrawLine()

@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //myScene->setSceneRect(0,0,ui->graphicsView->width(),ui->graphicsView->height());
     //qDebug()<<"scene width: "<< ui->graphicsView->width()<<"scene height: "<<ui->graphicsView->height();
     //myScene->setBasePoint(QPointF(10,myScene->height()-10));
+    this->setMinimumHeight(540);
     QDoubleValidator* validator=new QDoubleValidator(this);
     ui->NLineEdit->setValidator(validator);
     ui->MyLineEdit->setValidator(validator);
@@ -70,6 +71,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //QObject::connect(myScene, SIGNAL(signalFitView()), this, SLOT(slotFitView()));                          //send command fit view to graphics view
     QObject::connect(ui->actionZoom_in, SIGNAL(triggered()), this, SLOT(slotZoomIn()));
     QObject::connect(ui->actionZoom_out, SIGNAL(triggered()), this, SLOT(slotZoomOut()));
+    QObject::connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(close()));
     QObject::connect(ui->actionPan, SIGNAL(toggled(bool)), ui->graphicsView, SLOT(slotPan(bool)));
     QObject::connect(ui->actionLine, SIGNAL(triggered()), myScene, SLOT(setDrawLine()));                    //send command drawLine to Scene
     QObject::connect(ui->actionLine, SIGNAL(triggered()), ui->commandTextEdit, SLOT(slotDrawLine()));       //send command drawLine to textEdit
@@ -122,6 +124,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(myScene, SIGNAL(signalExportPercentChanged(int)), myInfo, SLOT(slotExportPercentChanged(int)));          //send porgress percentage to info window
     QObject::connect(myScene, SIGNAL(signalExportEnd()), myInfo, SLOT(slotExportEnd()));                              //send end export to excel signal to info window
     QObject::connect(myInfo, SIGNAL(signalApplyPressed(int)), myScene, SLOT(slotApplyPressed(int)));
+    QObject::connect(myInfo, SIGNAL(signalSaveToExcel(bool)), myScene, SLOT(slotSaveToExcel(bool)));
 }
 
 MainWindow::~MainWindow()

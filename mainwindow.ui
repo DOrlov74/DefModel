@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>725</width>
-    <height>556</height>
+    <width>716</width>
+    <height>569</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -17,7 +17,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Deformation model</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -34,7 +34,7 @@
         <property name="minimumSize">
          <size>
           <width>300</width>
-          <height>200</height>
+          <height>0</height>
          </size>
         </property>
        </widget>
@@ -585,7 +585,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>725</width>
+     <width>716</width>
      <height>21</height>
     </rect>
    </property>
@@ -598,13 +598,12 @@
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Edit</string>
     </property>
-    <addaction name="actionSet_concrete_section"/>
-    <addaction name="actionSet_reinforsement_section"/>
-    <addaction name="separator"/>
-    <addaction name="actionOptions"/>
    </widget>
    <widget class="QMenu" name="menuDraw">
     <property name="title">
@@ -658,6 +657,8 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionOpen"/>
+   <addaction name="actionSave"/>
    <addaction name="actionFit_to_section"/>
    <addaction name="actionZoom_in"/>
    <addaction name="actionZoom_out"/>
@@ -670,11 +671,19 @@
    </property>
   </action>
   <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="resourse.qrc">
+     <normaloff>:/Icon/fromExcel3.ico</normaloff>:/Icon/fromExcel3.ico</iconset>
+   </property>
    <property name="text">
     <string>Import points</string>
    </property>
   </action>
   <action name="actionSave">
+   <property name="icon">
+    <iconset resource="resourse.qrc">
+     <normaloff>:/Icon/toExcel3.ico</normaloff>:/Icon/toExcel3.ico</iconset>
+   </property>
    <property name="text">
     <string>Export points</string>
    </property>
