@@ -13,7 +13,7 @@
   <property name="minimumSize">
    <size>
     <width>0</width>
-    <height>50</height>
+    <height>540</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -254,6 +254,9 @@
                  <height>16777215</height>
                 </size>
                </property>
+               <property name="toolTip">
+                <string>New reinforcement</string>
+               </property>
                <property name="text">
                 <string>New</string>
                </property>
@@ -275,6 +278,9 @@
                  <width>60</width>
                  <height>16777215</height>
                 </size>
+               </property>
+               <property name="toolTip">
+                <string>Draw reinforcement</string>
                </property>
                <property name="text">
                 <string>Point</string>
@@ -673,7 +679,7 @@
   <action name="actionOpen">
    <property name="icon">
     <iconset resource="resourse.qrc">
-     <normaloff>:/Icon/fromExcel3.ico</normaloff>:/Icon/fromExcel3.ico</iconset>
+     <normaloff>:/Icon/fromExcel4.ico</normaloff>:/Icon/fromExcel4.ico</iconset>
    </property>
    <property name="text">
     <string>Import points</string>
@@ -682,7 +688,7 @@
   <action name="actionSave">
    <property name="icon">
     <iconset resource="resourse.qrc">
-     <normaloff>:/Icon/toExcel3.ico</normaloff>:/Icon/toExcel3.ico</iconset>
+     <normaloff>:/Icon/toExcel4.ico</normaloff>:/Icon/toExcel4.ico</iconset>
    </property>
    <property name="text">
     <string>Export points</string>

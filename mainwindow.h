@@ -26,6 +26,7 @@ class MainWindow : public QMainWindow
     void fillRCombobox();
 
 signals:
+    void signalSceneInit();
     void signalKeyPressed(QString);
     void signalSetEb(double);
     void signalSetEs(double);
@@ -44,8 +45,6 @@ public slots:
 //    void divideToggled(bool);
 //    void newSectionToggled(bool);
     void slotFitView();
-    void slotZoomIn();
-    void slotZoomOut();
     void slotCoordChanged(QPointF);
     void slotCClassChanged(QString);
     void slotRClassChanged(QString);

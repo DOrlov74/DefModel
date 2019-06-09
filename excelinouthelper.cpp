@@ -7,17 +7,16 @@
 
 ExcelInOutHelper::ExcelInOutHelper(QObject *parent) : QObject(parent)
 {
-
+    m_excel = new QAxObject( "Excel.Application", this );
 }
 
 ExcelInOutHelper::~ExcelInOutHelper()
 {
-
+    m_excel->dynamicCall("Quit()");
 }
 
 void ExcelInOutHelper::importPoints(QString fileName, int sheetNumber)
 {
-    m_excel = new QAxObject( "Excel.Application", this );
     m_workbooks=m_excel->querySubObject("Workbooks");
     m_workbook=m_workbooks->querySubObject("Open(const QString&)", QFileInfo(fileName).absoluteFilePath());
     m_sheets=m_workbook->querySubObject("Worksheets");
@@ -106,13 +105,12 @@ void ExcelInOutHelper::importPoints(QString fileName, int sheetNumber)
         while (firstRow<=nRows&&isNumeric);
     }
     m_workbook->dynamicCall("Close()");
-    m_excel->dynamicCall("Quit()");
     delete cell;
 }
 
 void ExcelInOutHelper::exportPoints(const QVector<QPointF>& vCPoints, const QVector<QPair<uint,QPointF>>& vRPoints)
 {
-    m_excel = new QAxObject( "Excel.Application", this );
+    //m_excel = new QAxObject( "Excel.Application", this );
     m_excel->setProperty("DisplayAlerts", false);
     m_workbooks=m_excel->querySubObject("Workbooks");
     m_workbook=m_workbooks->querySubObject("Add");
@@ -146,13 +144,13 @@ void ExcelInOutHelper::exportPoints(const QVector<QPointF>& vCPoints, const QVec
     qDebug()<<fileName;
     m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);
     m_workbook->dynamicCall("Close()");
-    m_excel->dynamicCall("Quit()");
+    //m_excel->dynamicCall("Quit()");
     delete cell;
 }
 
 void ExcelInOutHelper::saveArea(const QVector<QVector<double>>& vCArea, const QVector<double>& vRArea)
 {
-    m_excel = new QAxObject( "Excel.Application", this );
+    //m_excel = new QAxObject( "Excel.Application", this );
     m_excel->setProperty("DisplayAlerts", false);
     m_workbooks=m_excel->querySubObject("Workbooks");
     m_workbook=m_workbooks->querySubObject("Add");
@@ -189,14 +187,14 @@ void ExcelInOutHelper::saveArea(const QVector<QVector<double>>& vCArea, const QV
     qDebug()<<fileName;
     m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);
     m_workbook->dynamicCall("Close()");
-    m_excel->dynamicCall("Quit()");
+    //m_excel->dynamicCall("Quit()");
     delete cell;
 }
 
 void ExcelInOutHelper::saveCenterDist(const QVector<QVector<QPointF>>& vCDist, const QVector<QPointF>& vRDist)
 {
     QString fileName= QDir::currentPath()+"/report.xls";
-    m_excel = new QAxObject( "Excel.Application", this );
+    //m_excel = new QAxObject( "Excel.Application", this );
     m_excel->setProperty("DisplayAlerts", false);
     m_workbooks=m_excel->querySubObject("Workbooks");
     m_workbook=m_workbooks->querySubObject("Open(const QString&)", QFileInfo(fileName).absoluteFilePath());
@@ -261,14 +259,14 @@ void ExcelInOutHelper::saveCenterDist(const QVector<QVector<QPointF>>& vCDist, c
     }
     m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);
     m_workbook->dynamicCall("Close()");
-    m_excel->dynamicCall("Quit()");
+    //m_excel->dynamicCall("Quit()");
     delete cell;
 }
 
 void ExcelInOutHelper::saveKElast(const QVector<QVector<double>>& vKbElast, const QVector<double>& vKrElast)
 {
     QString fileName= QDir::currentPath()+"/report.xls";
-    m_excel = new QAxObject( "Excel.Application", this );
+    //m_excel = new QAxObject( "Excel.Application", this );
     m_excel->setProperty("DisplayAlerts", false);
     m_workbooks=m_excel->querySubObject("Workbooks");
     m_workbook=m_workbooks->querySubObject("Open(const QString&)", QFileInfo(fileName).absoluteFilePath());
@@ -306,14 +304,14 @@ void ExcelInOutHelper::saveKElast(const QVector<QVector<double>>& vKbElast, cons
     }
     m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);
     m_workbook->dynamicCall("Close()");
-    m_excel->dynamicCall("Quit()");
+    //m_excel->dynamicCall("Quit()");
     delete cell;
 }
 
 void ExcelInOutHelper::savevEb(const QVector<QVector<double>>& vEb)
 {
     QString fileName= QDir::currentPath()+"/report.xls";
-    m_excel = new QAxObject( "Excel.Application", this );
+    //m_excel = new QAxObject( "Excel.Application", this );
     m_excel->setProperty("DisplayAlerts", false);
     m_workbooks=m_excel->querySubObject("Workbooks");
     m_workbook=m_workbooks->querySubObject("Open(const QString&)", QFileInfo(fileName).absoluteFilePath());
@@ -340,14 +338,14 @@ void ExcelInOutHelper::savevEb(const QVector<QVector<double>>& vEb)
     }
     m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);
     m_workbook->dynamicCall("Close()");
-    m_excel->dynamicCall("Quit()");
+    //m_excel->dynamicCall("Quit()");
     delete cell;
 }
 
 void ExcelInOutHelper::saveStrain(const QVector<QVector<double>>& vCStrain, const QVector<double>& vRStrain)
 {
     QString fileName= QDir::currentPath()+"/report.xls";
-    m_excel = new QAxObject( "Excel.Application", this );
+    //m_excel = new QAxObject( "Excel.Application", this );
     m_excel->setProperty("DisplayAlerts", false);
     m_workbooks=m_excel->querySubObject("Workbooks");
     m_workbook=m_workbooks->querySubObject("Open(const QString&)", QFileInfo(fileName).absoluteFilePath());
@@ -385,14 +383,14 @@ void ExcelInOutHelper::saveStrain(const QVector<QVector<double>>& vCStrain, cons
     }
     m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);
     m_workbook->dynamicCall("Close()");
-    m_excel->dynamicCall("Quit()");
+    //m_excel->dynamicCall("Quit()");
     delete cell;
 }
 
 void ExcelInOutHelper::saveStress(const QVector<QVector<double>>& vCStress, const QVector<double>& vRStress)
 {
     QString fileName= QDir::currentPath()+"/report.xls";
-    m_excel = new QAxObject( "Excel.Application", this );
+    //m_excel = new QAxObject( "Excel.Application", this );
     m_excel->setProperty("DisplayAlerts", false);
     m_workbooks=m_excel->querySubObject("Workbooks");
     m_workbook=m_workbooks->querySubObject("Open(const QString&)", QFileInfo(fileName).absoluteFilePath());
@@ -430,7 +428,7 @@ void ExcelInOutHelper::saveStress(const QVector<QVector<double>>& vCStress, cons
     }
     m_workbook->dynamicCall("SaveAs(const QString&, QVariant)", fileName.replace("/", "\\"), -4143);
     m_workbook->dynamicCall("Close()");
-    m_excel->dynamicCall("Quit()");
+    //m_excel->dynamicCall("Quit()");
     delete cell;
 }
 

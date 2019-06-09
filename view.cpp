@@ -4,8 +4,8 @@
 
 view::view(QWidget *parent) : QGraphicsView(parent)
 {
-    emit signalViewInit();
-    qDebug()<<"signal view init emited";
+    //emit signalViewInit();
+    //qDebug()<<"signal view init emited";
     //qDebug()<<"view width: "<< this->width()<<"view height: "<< this->height();
     setMouseTracking(true);
 }
@@ -27,6 +27,17 @@ void view::wheelEvent(QWheelEvent *event)
           scale(1.25, 1.25);
         else
           scale(0.8, 0.8);
+}
+
+
+void view::slotZoomIn()
+{
+    this->scale(1.25,1.25);
+}
+
+void view::slotZoomOut()
+{
+    this->scale(0.8,0.8);
 }
 
 

@@ -15,10 +15,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     myScene= new Scene(this);
     ui->graphicsView->setScene(myScene);
-    //myScene->setSceneRect(0,0,ui->graphicsView->width(),ui->graphicsView->height());
-    //qDebug()<<"scene width: "<< ui->graphicsView->width()<<"scene height: "<<ui->graphicsView->height();
+    myScene->setSceneRect(0,0,ui->graphicsView->width(),200);
+    //qDebug()<<"view width: "<< ui->graphicsView->width()<<"view height: "<<ui->graphicsView->height();
+    qDebug()<<"scene width: "<< myScene->sceneRect().width()<<"scene height: "<<myScene->sceneRect().height();
     //myScene->setBasePoint(QPointF(10,myScene->height()-10));
-    this->setMinimumHeight(540);
+    //this->setMinimumHeight(540);
     QDoubleValidator* validator=new QDoubleValidator(this);
     ui->NLineEdit->setValidator(validator);
     ui->MyLineEdit->setValidator(validator);
@@ -68,9 +69,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(myScene, SIGNAL(signalForcesDone(bool)), ui->calculateButton, SLOT(setEnabled(bool)));     //enable calculate Button
     QObject::connect(myScene, SIGNAL(signalForcesDone(bool)), ui->actionCalculate, SLOT(setEnabled(bool)));
     QObject::connect(ui->actionFit_to_section, SIGNAL(triggered()), myScene, SLOT(slotFitView()));             //send command fit view to scene
-    //QObject::connect(myScene, SIGNAL(signalFitView()), this, SLOT(slotFitView()));                          //send command fit view to graphics view
-    QObject::connect(ui->actionZoom_in, SIGNAL(triggered()), this, SLOT(slotZoomIn()));
-    QObject::connect(ui->actionZoom_out, SIGNAL(triggered()), this, SLOT(slotZoomOut()));
+    QObject::connect(myScene, SIGNAL(signalFitView()), this, SLOT(slotFitView()));                          //send command fit view to graphics view
+    QObject::connect(ui->actionZoom_in, SIGNAL(triggered()), ui->graphicsView, SLOT(slotZoomIn()));
+    QObject::connect(ui->actionZoom_out, SIGNAL(triggered()), ui->graphicsView, SLOT(slotZoomOut()));
     QObject::connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(close()));
     QObject::connect(ui->actionPan, SIGNAL(toggled(bool)), ui->graphicsView, SLOT(slotPan(bool)));
     QObject::connect(ui->actionLine, SIGNAL(triggered()), myScene, SLOT(setDrawLine()));                    //send command drawLine to Scene
@@ -97,8 +98,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(this, SIGNAL(signalKeyPressed(QString)), ui->commandTextEdit, SLOT(slotAddKey(QString)));      //send command key from mainWidget to textEdit
     QObject::connect(this, SIGNAL(signalKeyPressed(QString)), myScene, SLOT(slotGetCommand(QString)));              //send command key from mainWidget to Scene
     QObject::connect(ui->commandTextEdit, SIGNAL(signalCommand(QString)), myScene, SLOT(slotGetCommand(QString)));  //send command key from textEdit to Scene
-    QObject::connect(ui->graphicsView, SIGNAL(signalViewInit()), myScene, SLOT(slotSceneInit()), Qt::QueuedConnection); //try to get actual size of Scene не работает
-    QObject::connect(ui->graphicsView, SIGNAL(signalViewInit()), this, SLOT(setSceneSize()), Qt::QueuedConnection);     //try to get actual size of Scene  не работает
+    QObject::connect(this, SIGNAL(signalSceneInit()), myScene, SLOT(slotSceneInit()), Qt::QueuedConnection);        //try to get actual size of Scene не работает
+    //QObject::connect(ui->graphicsView, SIGNAL(signalViewInit()), this, SLOT(setSceneSize()), Qt::QueuedConnection);     //try to get actual size of Scene  не работает
     ui->diameterSpinBox->setValue(myScene->getCurrDiam());
     QObject::connect(ui->actionOpen, SIGNAL(triggered()), myScene, SLOT(slotImportPoints()));
     QObject::connect(ui->actionSave, SIGNAL(triggered()), myScene, SLOT(slotExportPoints()));
@@ -125,6 +126,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(myScene, SIGNAL(signalExportEnd()), myInfo, SLOT(slotExportEnd()));                              //send end export to excel signal to info window
     QObject::connect(myInfo, SIGNAL(signalApplyPressed(int)), myScene, SLOT(slotApplyPressed(int)));
     QObject::connect(myInfo, SIGNAL(signalSaveToExcel(bool)), myScene, SLOT(slotSaveToExcel(bool)));
+    QObject::connect(myScene, SIGNAL(signalSceneCleared(bool)), ui->actionOpen, SLOT(setEnabled(bool)));                //Enable import from excel action
+    QObject::connect(myScene, SIGNAL(signalSectDone(bool)), ui->actionOpen, SLOT(setDisabled(bool)));                    //Disable import from excel action
+    emit signalSceneInit();
 }
 
 MainWindow::~MainWindow()
@@ -166,17 +170,7 @@ void MainWindow::setSceneSize()
 void MainWindow::slotFitView()
 {
     ui->graphicsView->fitInView(myScene->sceneRect(), Qt::KeepAspectRatio);
-
-}
-
-void MainWindow::slotZoomIn()
-{
-    ui->graphicsView->scale(1.25,1.25);
-}
-
-void MainWindow::slotZoomOut()
-{
-    ui->graphicsView->scale(0.8,0.8);
+    qDebug()<<"in mainWindow::slotFitView";
 }
 
 void MainWindow::slotCoordChanged(QPointF point)

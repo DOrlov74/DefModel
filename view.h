@@ -19,6 +19,8 @@ signals:
 
 public slots:
     void slotPan(bool);
+    void slotZoomIn();
+    void slotZoomOut();
 
     // QWidget interface
 protected:

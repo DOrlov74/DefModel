@@ -42,7 +42,7 @@ void InfoForm::slotExportPercentChanged(int i)
 
 void InfoForm::slotExportEnd()
 {
-    ui->exportLabel->setText("Rasult is saved successfully to result.xls");
+    ui->exportLabel->setText("Result is saved successfully to result.xls");
 }
 
 void InfoForm::slotApplyPressed()

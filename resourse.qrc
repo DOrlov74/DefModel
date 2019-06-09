@@ -8,5 +8,7 @@
         <file>Icon/toExcel2.ico</file>
         <file>Icon/toExcel3.ico</file>
         <file>Icon/fromExcel3.ico</file>
+        <file>Icon/fromExcel4.ico</file>
+        <file>Icon/toExcel4.ico</file>
     </qresource>
 </RCC>

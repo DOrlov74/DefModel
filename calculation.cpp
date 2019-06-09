@@ -91,7 +91,7 @@ bool Calculation::saveResult()
 {
     emit signalExportStart();
     emit signalExportPercentChanged(10);
-    ExcelInOutHelper* myExcel=new ExcelInOutHelper(this);
+    ExcelInOutHelper* myExcel=new ExcelInOutHelper();
     myExcel->saveArea(m_concreteArea, m_reinfArea);
     emit signalExportPercentChanged(30);
     myExcel->saveCenterDist(m_concreteCenter, m_reinfCenter);
@@ -109,6 +109,7 @@ bool Calculation::saveResult()
     myExcel->saveStress(m_concreteStress, m_reinfStress);
     emit signalExportPercentChanged(100);
     emit signalExportEnd();
+    delete myExcel;
 }
 
 Calculation::Calculation(QObject *parent) : QObject(parent)

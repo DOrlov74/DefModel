@@ -28,8 +28,9 @@ class Scene : public QGraphicsScene
     QVector<QVector<QVector<QVector<int>>>> m_dividedFaces;          //Numbers of points for every face of divided rectangular
     QVector<QPair<uint,QPointF>> m_reinfCircles;    //container to store diameter and point of every reinforcement bar
     QPainterPath* m_concretePath;       //Path to draw concrete section
+    QPainterPath* m_baseSignPath;       //Path to draw base sign
     uint m_currDiam=10;                    //current reinforcement diameter
-    QPen pen;
+    QPen pen=QPen(QColor(100,100,100));
     QBrush brush;
     QBrush bCompressed=QBrush(QColor(0,180,220),Qt::SolidPattern);           //Brush to draw compressed concrete
     QBrush bTensile=QBrush(QColor(200,240,255),Qt::SolidPattern);           //Brush to draw tensile concrete
@@ -37,6 +38,7 @@ class Scene : public QGraphicsScene
     QGraphicsEllipseItem* m_currentItem;
     QList<QGraphicsItem*> m_pointsItems;        //List to store points of concrete section
     QGraphicsItem* m_pathItem;                  //Pointer to the concrete path item
+    QVector<QGraphicsItem*> m_baseSignItem;                  //Pointer to the base sign item
     QVector<QVector<QGraphicsRectItem*>> m_divisionItems;    //Container to store divided rectangles of concrete section
     QVector<QVector<QGraphicsPathItem*>> m_divisionPaths;    //Container to store divided paths of concrete section
     QList<QGraphicsEllipseItem*> m_reinfItems;      //List to store reinforcement circles
@@ -67,11 +69,16 @@ class Scene : public QGraphicsScene
     int m_resultMode=1;             //flag to store output type
     bool m_saveToExcel=false;       //flag to store option to save result to excel
     bool m_calcIsSuccessful=false;          //flag to store if the calculation is successful
+    uint m_fontSize;                        //store font size for result output
+    QFont m_titleFont;                        //font style for title of result output
+    QFont m_textFont;                         //font style for text of result output
+    QBrush m_renfTextColor=QBrush(QColor(200,0,150));                   // color for reinforcement text result
 
     QPointF toSceneCoord(const QPointF&);   //Transform coordinats methods
     QPointF fromSceneCoord(const QPointF&);
     void drawPoint(const QPointF&);         //Draw points of concrete section method
     void getSectSizes();
+    void setSceneSize();
     void drawDivisions();
     bool isBetween(QPointF, QPointF, QPointF);
     void Divide();
@@ -81,6 +88,8 @@ class Scene : public QGraphicsScene
     void DrawStrain();
     void DrawArea();
     void clearResult();
+    QGraphicsSimpleTextItem* fitFont(QGraphicsSimpleTextItem*);
+    void setFontSize();
 
 public:
     explicit Scene(QWidget *parent = nullptr);
