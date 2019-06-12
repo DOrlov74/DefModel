@@ -2018,11 +2018,11 @@ void Scene::drawDivisions()
         m_divisionItems.fill(QVector<QGraphicsRectItem*>(),nXdivisions);
         for (int i=1; i<=nXdivisions; ++i)
         {
-            m_divisionItems[i].fill(nullptr,nYdivisions);
+            m_divisionItems[i-1].fill(nullptr,nYdivisions);
             for (int j=1; j<=nYdivisions; ++j)
             {
                 QRectF r=QRectF(m_dividedPoints[i-1][j-1].x(),m_dividedPoints[i-1][j-1].y(),(m_dividedPoints[i][j].x()-m_dividedPoints[i-1][j].x()),(m_dividedPoints[i][j].y()-m_dividedPoints[i][j-1].y()));
-                m_divisionItems[i][j]=this->addRect(r,pen,brush);
+                m_divisionItems[i-1][j-1]=this->addRect(r,pen,brush);
                 qDebug()<<"x:"+QString::number(m_dividedPoints[i][j].x())+" y:"+ QString::number(m_dividedPoints[i][j].y());
             }
         }
