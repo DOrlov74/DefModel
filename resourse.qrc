@@ -10,5 +10,6 @@
         <file>Icon/fromExcel3.ico</file>
         <file>Icon/fromExcel4.ico</file>
         <file>Icon/toExcel4.ico</file>
+        <file>Icon/Defmodel.ico</file>
     </qresource>
 </RCC>

@@ -55,3 +55,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     resourse.qrc
+
+RC_ICONS+=/Icon/Defmodel.ico
+
+RC_FILE     = resources.rc
